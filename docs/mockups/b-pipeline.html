@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup B: Pipeline</title>
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="b.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top" id="top"></header>
+  <section class="pipe-head intro">
+    <div>
+      <div class="eyebrow">Pipeline</div>
+      <h1 class="headline" id="headline"></h1>
+    </div>
+    <div class="stats" id="stats"></div>
+  </section>
+  <section class="board" id="board"></section>
+</div>
+<script src="mock-data.js"></script>
+<script src="charts.js"></script>
+<script src="b-shell.js"></script>
+<script>
+  shell("Pipeline");
+  document.getElementById("headline").innerHTML = `${KPI.openCount} open deals, <em>${KPI.lateCount} running late</em>.`;
+  document.getElementById("stats").innerHTML = `
+    <div class="stat"><div class="lbl">Open value</div><div class="v num">${money(KPI.openValue)}</div></div>
+    <div class="stat"><div class="lbl">Expected revenue</div><div class="v num">${money(KPI.openExpected)}</div></div>`;
+  document.getElementById("board").innerHTML = STAGES.map((s) => {
+    const ds = dealsIn(s.key);
+    const closed = !OPEN_STAGES.includes(s.key);
+    const cards = ds.map((d, i) => {
+      const dragging = s.key === "Qualified" && i === 0;
+      return `${s.key === "Negotiation" && i === 1 ? '<div class="ghost-slot"></div>' : ""}
+      <div class="card ${isLate(d) ? "late" : ""} ${dragging ? "drag" : ""}">
+        <div class="cn">${d.name}</div>
+        <div class="co">${d.org}</div>
+        <div class="cv num">${money(d.value)}</div>
+        <div class="meter"><i style="width:${d.prob}%;background:${s.color}"></i></div>
+        <div class="cf"><span class="cd num">${isLate(d) ? "Late, " : ""}${shortDate(d.close)}</span><span class="num">${d.prob}%</span></div>
+      </div>`;
+    }).join("");
+    return `<div class="col ${closed ? "closed" : ""}">
+      <div class="col-h" style="background:${s.color};color:${s.ink}">
+        <div class="t">${s.key}<span class="num">${ds.length}</span></div>
+        <div class="v num">${money(sum(ds, (d) => d.value))}</div>
+        <div class="e num">Expected ${money(sum(ds, expected))}</div>
+      </div>
+      <div class="cards">${cards}</div>
+      <div class="add">+ Add deal</div>
+    </div>`;
+  }).join("");
+</script>
+</body>
+</html>

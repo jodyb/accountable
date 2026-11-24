@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup B: Dashboard</title>
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="b.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top" id="top"></header>
+
+  <section class="intro">
+    <div>
+      <div class="eyebrow">Tuesday, 24 November 2026</div>
+      <h1 class="headline" id="headline"></h1>
+    </div>
+    <button class="btn ghost"><span class="ic" data-i="note"></span>Log activity</button>
+  </section>
+
+  <section class="panel hero">
+    <div class="hero-l">
+      <div class="big">
+        <div class="lbl">Revenue won, last 12 months</div>
+        <div class="v num" id="year"></div>
+        <span class="delta">Best month: October, $115,500 USD</span>
+      </div>
+      <div class="minis" id="minis"></div>
+    </div>
+    <div>
+      <div class="ph"><h2>Revenue won by month</h2><span class="hint">USD</span></div>
+      <div id="line"></div>
+    </div>
+  </section>
+
+  <section class="row">
+    <div class="panel">
+      <div class="ph"><h2>Sales funnel</h2><span class="hint">Value that reached each stage</span></div>
+      <div class="funnel-wrap"><div id="funnel"></div><div class="legend" id="legend"></div></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h2>Deals won by month</h2><span class="hint">November so far</span></div>
+      <div id="bars"></div>
+    </div>
+  </section>
+
+  <section class="row r3">
+    <div class="panel">
+      <div class="ph"><h2>Follow-ups</h2><a class="link">All tasks</a></div>
+      <div class="fu-cols">
+        <div class="fu-col over"><h3>Overdue <span id="n-over"></span></h3><div id="over"></div></div>
+        <div class="fu-col up"><h3>Coming up <span id="n-up"></span></h3><div id="up"></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h2>Recent activity</h2><a class="link">View all</a></div>
+      <ul class="tl" id="tl"></ul>
+    </div>
+  </section>
+</div>
+<script src="mock-data.js"></script>
+<script src="charts.js"></script>
+<script src="b-shell.js"></script>
+<script>
+  shell("Dashboard");
+  const over = FOLLOW_UPS.filter((f) => f.overdue), up = FOLLOW_UPS.filter((f) => !f.overdue);
+  document.getElementById("headline").innerHTML =
+    `<b>${money(KPI.openExpected)}</b> expected from the open pipeline. <em>${over.length} follow-ups are overdue</em> and ${KPI.lateCount} deals are past their close date.`;
+  document.getElementById("year").textContent = money(KPI.wonYear);
+  document.getElementById("minis").innerHTML = [
+    ["Open pipeline", moneyShort(KPI.openValue)], ["Won this month", moneyShort(KPI.wonThisMonth)],
+    ["Win rate", KPI.winRate + "%"], ["Open deals", KPI.openCount],
+  ].map(([l, v]) => `<div class="mini"><div class="lbl">${l}</div><div class="v num">${v}</div></div>`).join("");
+  lineChart(document.getElementById("line"), { labels: MONTHS, values: WON_REVENUE, color: "var(--cerulean)", w: 760, h: 250 });
+  funnelTaper(document.getElementById("funnel"), FUNNEL, { w: 420, rowH: 48 });
+  document.getElementById("legend").innerHTML = FUNNEL.map((s) =>
+    `<div><span class="k"><i style="background:${s.color}"></i>${s.key}</span><span class="n num">${money(s.value)}</span></div>`).join("");
+  barChart(document.getElementById("bars"), { labels: MONTHS, values: WON_COUNT, color: "var(--coral)", w: 560, h: 290 });
+  const task = (f) => `<div class="task"><span class="box"></span><div><div>${f.text}</div>
+    <div class="m"><a class="link">${f.rec}</a><span class="num">${f.due}</span></div></div></div>`;
+  document.getElementById("over").innerHTML = over.map(task).join("");
+  document.getElementById("up").innerHTML = up.map(task).join("");
+  document.getElementById("n-over").textContent = over.length;
+  document.getElementById("n-up").textContent = up.length;
+  const dot = { stage: "var(--seagreen)", call: "var(--cerulean)", email: "var(--marigold)", note: "var(--coral)" };
+  const label = { stage: "Stage change", call: "Call", email: "Email", note: "Note" };
+  document.getElementById("tl").innerHTML = ACTIVITIES.slice(0, 6).map((a) => `
+    <li><i style="background:${dot[a.type]}"></i>
+      <div class="${a.type === "stage" ? "stage-t" : ""}">${a.text}</div>
+      <div class="m">${label[a.type]} · <a class="link">${a.rec}</a> · <span class="num">${a.when}</span></div></li>`).join("");
+  document.querySelectorAll("[data-i]").forEach((e) => (e.innerHTML = ICON[e.dataset.i]));
+</script>
+</body>
+</html>

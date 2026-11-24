@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup A: Dashboard</title>
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="a.css">
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side"></aside>
+  <main class="main">
+    <header class="head">
+      <div>
+        <h1>Dashboard</h1>
+        <p class="sub">Tuesday, 24 November 2026</p>
+      </div>
+      <div class="head-actions">
+        <button class="btn ghost"><span class="ic" data-i="note"></span>Log activity</button>
+        <button class="btn"><span class="ic" data-i="plus"></span>New deal</button>
+      </div>
+    </header>
+
+    <section class="kpis" id="kpis"></section>
+
+    <section class="grid-2">
+      <div class="panel">
+        <div class="ph"><h2>Revenue won</h2><span class="hint">Last 12 months, USD</span></div>
+        <div id="line"></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><h2>Deals won</h2><span class="hint">Per month</span></div>
+        <div id="bars"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="ph"><h2>Sales funnel</h2><span class="hint">Value that reached each stage</span></div>
+      <div class="funnel" id="funnel"></div>
+    </section>
+
+    <section class="grid-2 even">
+      <div class="panel">
+        <div class="ph"><h2>Recent activity</h2><a class="link">View all</a></div>
+        <ul class="feed" id="feed"></ul>
+      </div>
+      <div class="panel">
+        <div class="ph"><h2>Follow-ups</h2><span class="hint" id="fu-hint"></span></div>
+        <ul class="tasks" id="tasks"></ul>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="mock-data.js"></script>
+<script src="charts.js"></script>
+<script src="a-shell.js"></script>
+<script>
+  shell("Dashboard");
+  const tiles = [
+    ["Open pipeline", money(KPI.openValue), `${KPI.openCount} open deals`, "var(--cerulean)"],
+    ["Expected revenue", money(KPI.openExpected), "Value x probability", "var(--marigold)"],
+    ["Won this month", money(KPI.wonThisMonth), `${KPI.wonThisMonthCount} deals in November`, "var(--seagreen)"],
+    ["Win rate", KPI.winRate + "%", "Last 12 months", "var(--coral)"],
+  ];
+  document.getElementById("kpis").innerHTML = tiles.map(([l, v, s, c]) => `
+    <div class="kpi panel"><span class="dot" style="background:${c}"></span>
+      <div class="kl">${l}</div><div class="kv num">${v}</div><div class="ks">${s}</div></div>`).join("");
+  lineChart(document.getElementById("line"), { labels: MONTHS, values: WON_REVENUE, h: 250 });
+  barChart(document.getElementById("bars"), { labels: MONTHS, values: WON_COUNT, w: 420, h: 250 });
+  funnelBars(document.getElementById("funnel"), FUNNEL);
+  document.getElementById("feed").innerHTML = ACTIVITIES.map((a) => `
+    <li><span class="fi ${a.type}">${ICON[a.type]}</span>
+      <div><div>${a.text}</div><div class="meta"><a class="link">${a.rec}</a></div></div>
+      <span class="when num">${a.when}</span></li>`).join("");
+  const od = FOLLOW_UPS.filter((f) => f.overdue).length;
+  document.getElementById("fu-hint").innerHTML = `<span class="pill rasp">${od} overdue</span>`;
+  document.getElementById("tasks").innerHTML = FOLLOW_UPS.map((f) => `
+    <li class="${f.overdue ? "over" : ""}"><span class="box"></span>
+      <div><div>${f.text}</div><div class="meta"><a class="link">${f.rec}</a></div></div>
+      <span class="due num">${f.overdue ? "Overdue, " : ""}${f.due}</span></li>`).join("");
+  document.querySelectorAll("[data-i]").forEach((e) => (e.innerHTML = ICON[e.dataset.i]));
+</script>
+</body>
+</html>

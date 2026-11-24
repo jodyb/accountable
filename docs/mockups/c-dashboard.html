@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup C: Dashboard</title>
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="c.css">
+</head>
+<body>
+<div class="app">
+  <nav class="rail" id="rail"></nav>
+  <main class="main">
+    <div class="bar">
+      <h1>Dashboard</h1><span class="crumb">Tuesday, 24 November 2026</span>
+      <span class="sp"></span>
+      <div class="search"><span class="ic" data-i="search"></span>Search</div>
+      <button class="btn ghost"><span class="ic" data-i="note"></span>Log activity</button>
+      <button class="btn"><span class="ic" data-i="plus"></span>New deal</button>
+    </div>
+
+    <section class="hero">
+      <div>
+        <div class="greet" id="greet"></div>
+        <div class="hk" id="hk"></div>
+      </div>
+      <div>
+        <div class="ch-h"><b>Revenue won by month</b><span>Dec 2025 to Nov 2026, USD</span></div>
+        <div id="line"></div>
+      </div>
+    </section>
+
+    <section class="g3">
+      <div class="panel">
+        <div class="ph"><h2>Sales funnel</h2><span class="hint">Value that reached each stage, and share of New</span></div>
+        <div class="steps" id="steps"></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><h2>Deals won by month</h2><span class="hint">Count</span></div>
+        <div id="bars"></div>
+      </div>
+    </section>
+
+    <section class="g2">
+      <div class="panel">
+        <div class="ph"><h2>Follow-ups</h2><a class="link">All tasks</a></div>
+        <table id="tasks"></table>
+      </div>
+      <div class="panel">
+        <div class="ph"><h2>Recent activity</h2><a class="link">View all</a></div>
+        <table id="feed"></table>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="mock-data.js"></script>
+<script src="charts.js"></script>
+<script src="c-shell.js"></script>
+<script>
+  shell("Dashboard");
+  document.getElementById("greet").innerHTML =
+    `Good morning. You have <span>${money(KPI.openExpected)}</span> expected from ${KPI.openCount} open deals.`;
+  document.getElementById("hk").innerHTML = [
+    ["Open pipeline", money(KPI.openValue), "Total value of open deals", ""],
+    ["Won this month", money(KPI.wonThisMonth), `${KPI.wonThisMonthCount} deals so far`, "sg"],
+    ["Win rate", KPI.winRate + "%", "Last 12 months", ""],
+    ["Late deals", KPI.lateCount, "Past their close date", ""],
+  ].map(([l, v, s, c]) => `<div><div class="lbl">${l}</div><div class="v num ${c}">${v}</div><div class="s">${s}</div></div>`).join("");
+  lineChart(document.getElementById("line"), { labels: MONTHS, values: WON_REVENUE, color: "var(--seagreen)", w: 760, h: 230 });
+  const first = FUNNEL[0].value;
+  document.getElementById("steps").innerHTML = FUNNEL.map((s) => `
+    <div class="step">
+      <div class="blk" style="height:${Math.max(18, (100 * s.value) / first)}%;background:${s.color};color:${s.ink}">
+        <span class="num">${moneyShort(s.value)}</span><span class="c">${s.count} deals</span></div>
+      <div class="nm">${s.key}</div><div class="pc num">${Math.round((100 * s.value) / first)}%</div>
+    </div>`).join("");
+  barChart(document.getElementById("bars"), { labels: MONTHS, values: WON_COUNT, color: "var(--marigold)", w: 460, h: 300 });
+  document.getElementById("tasks").innerHTML = FOLLOW_UPS.map((f) => `
+    <tr class="${f.overdue ? "over" : ""}"><td style="width:26px"><div class="chk"></div></td>
+      <td><div>${f.text}</div><div class="sub"><a class="link">${f.rec}</a></div></td>
+      <td class="when"><span class="due-tag ${f.overdue ? "over" : "up"} num">${f.overdue ? "Overdue " : "Due "}${f.due}</span></td></tr>`).join("");
+  document.getElementById("feed").innerHTML = ACTIVITIES.slice(0, 6).map((a) => `
+    <tr><td style="width:34px"><div class="t-ic">${ICON[a.type]}</div></td>
+      <td><div>${a.text}</div><div class="sub"><a class="link">${a.rec}</a></div></td>
+      <td class="when num">${a.when}</td></tr>`).join("");
+  document.querySelectorAll("[data-i]").forEach((e) => (e.innerHTML = ICON[e.dataset.i]));
+</script>
+</body>
+</html>

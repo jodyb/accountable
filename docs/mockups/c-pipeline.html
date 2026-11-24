@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup C: Pipeline</title>
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="c.css">
+</head>
+<body>
+<div class="app">
+  <nav class="rail" id="rail"></nav>
+  <main class="main">
+    <div class="bar">
+      <h1>Pipeline</h1><span class="crumb">Drag a card to change its stage or its place in a column</span>
+      <span class="sp"></span>
+      <div class="search"><span class="ic" data-i="search"></span>Search deals</div>
+      <button class="btn"><span class="ic" data-i="plus"></span>New deal</button>
+    </div>
+
+    <section class="panel strip-panel">
+      <div>
+        <div class="ph" style="margin-bottom:10px"><h2>Open value by stage</h2></div>
+        <div class="strip" id="strip"></div>
+      </div>
+      <div class="tot">
+        <div><div class="lbl">Open value</div><div class="v num"><span id="ov"></span></div></div>
+        <div><div class="lbl">Expected revenue</div><div class="v num"><span id="ex"></span></div></div>
+      </div>
+    </section>
+
+    <section class="board" id="board"></section>
+  </main>
+</div>
+<script src="mock-data.js"></script>
+<script src="charts.js"></script>
+<script src="c-shell.js"></script>
+<script>
+  shell("Pipeline");
+  document.getElementById("ov").textContent = money(KPI.openValue);
+  document.getElementById("ex").textContent = money(KPI.openExpected);
+  document.getElementById("strip").innerHTML = OPEN_STAGES.map((k) => {
+    const s = stageOf(k), v = sum(dealsIn(k), (d) => d.value);
+    return `<div style="flex:${v};background:${s.color};color:${s.ink}"><span class="num">${k} ${moneyShort(v)}</span></div>`;
+  }).join("");
+  document.getElementById("board").innerHTML = STAGES.map((s) => {
+    const ds = dealsIn(s.key);
+    const closed = !OPEN_STAGES.includes(s.key);
+    const cards = ds.map((d, i) => {
+      const drag = s.key === "New" && i === 1;
+      return `${s.key === "Qualified" && i === 2 ? '<div class="slot"></div>' : ""}
+      <div class="card ${isLate(d) ? "late" : ""} ${drag ? "drag" : ""}">
+        <div class="av">${initials(d.org)}</div>
+        <div class="cn">${d.name}</div>
+        <div class="co">${d.org}</div>
+        <div class="cf"><span class="num" style="font-weight:600">${money(d.value)}</span>
+          <span class="num ${isLate(d) ? "lt" : "ex"}">${shortDate(d.close)}</span></div>
+        ${isLate(d) ? '<div></div><div><span class="late-tag">Late</span></div>' : ""}
+      </div>`;
+    }).join("");
+    return `<div class="col ${closed ? "closed" : ""}">
+      <div class="ch" style="background:${s.color};color:${s.ink}">${s.key}<span class="n">${ds.length}</span></div>
+      <div class="cm"><span>Value <b class="num">${moneyShort(sum(ds, (d) => d.value))}</b></span>
+        <span>Expected <b class="num">${moneyShort(sum(ds, expected))}</b></span></div>
+      ${cards}
+      <div class="addc">+ Add deal</div>
+    </div>`;
+  }).join("");
+  document.querySelectorAll("[data-i]").forEach((e) => (e.innerHTML = ICON[e.dataset.i]));
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+:root {
+  --seagreen: #06d6a0;
+  --seagreen-tint: #7de8cb;
+  --seagreen-ink: #047857;
+  --marigold: #ffc145;
+  --marigold-ink: #9a6a00;
+  --coral: #f78c6b;
+  --cerulean: #118ab2;
+  --raspberry: #ef476f;
+  --midnight: #073b4c;
+  --seamist: #cdd8db;
+  --page: #f0f4f5;
+  --panel: #ffffff;
+  --muted: #5b7680;
+  --grid: #e4ebed;
+  --soft: #f6f9f9;
+  --shadow: 0 1px 2px rgba(7, 59, 76, 0.04), 0 6px 20px rgba(7, 59, 76, 0.06);
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--page); }
+body {
+  font-family: "Instrument Sans", system-ui, sans-serif;
+  color: var(--midnight);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+.num, .tk { font-family: "JetBrains Mono", ui-monospace, monospace; }
+.serif { font-family: "Instrument Serif", Georgia, serif; }
+svg { display: block; }
+.chart { width: 100%; height: auto; }
+.tk { font-size: 11px; }
+.tk.val { font-size: 10px; }
+.ft-k { font: 600 13px "Instrument Sans", sans-serif; }
+.ft-v { font: 500 12px "JetBrains Mono", monospace; }
+.ic svg, svg.ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.late-tag {
+  display: inline-block; font: 600 10px/1 "Instrument Sans", sans-serif; letter-spacing: .04em; text-transform: uppercase;
+  background: var(--raspberry); color: #fff; padding: 4px 6px; border-radius: 5px;
+}
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; border: 0; cursor: pointer;
+  font: 600 13px "Instrument Sans", sans-serif; padding: 9px 14px; border-radius: 9px;
+  background: var(--seagreen); color: var(--midnight);
+}
+.btn.ghost { background: var(--panel); box-shadow: var(--shadow); }
