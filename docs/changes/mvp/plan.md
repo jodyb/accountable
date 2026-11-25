@@ -1,6 +1,6 @@
 # Plan: building the Accountable MVP
 
-How we build what `docs/intent.md` asks for and `docs/spec.md` designs. The visual reference is mockup direction A (`docs/mockups/a-*`).
+How we build what `intent.md` (in this folder) asks for and `docs/spec.md` designs. The visual reference is mockup direction A (`docs/mockups/a-*`).
 
 References used below:
 

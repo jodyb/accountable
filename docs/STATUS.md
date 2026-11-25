@@ -1,6 +1,6 @@
 # Status
 
-The MVP in `docs/plan.md` is built, Phases 1 to 8. Every automated check in the plan's Proof section is in place and passing. The manual checks that need a person (below) are still to do.
+The MVP in `docs/changes/mvp/plan.md` is built, Phases 1 to 8. Every automated check in the plan's Proof section is in place and passing. The manual checks that need a person (below) are still to do.
 
 ## Prerequisites
 
@@ -60,6 +60,10 @@ Test counts: 166 pytest, 66 Vitest, 45 Playwright.
 | 4 | Plan | Process | Phase 8's manual checks (M1, M2, M8) are still open, and the build went in as one commit rather than one per phase. | Open: the manual checks need a person; the commit history stays as it is. |
 | 5 | Bugs | Nit | A deal value too big for SQLite (over about $92 quadrillion) crashed with 500 instead of a field message. | Fixed: values are capped at $1 trillion in the API (422) and the form. |
 | 6 | Bugs | Nit | An activity could be saved as done with no follow-up date, so a follow-up added later started out done and never reached the dashboard. | Fixed: the form clears done when there is no follow-up date. |
+
+## Docs layout
+
+`docs/spec.md` describes the whole product as it stands and is the authority. Each change keeps its intent and plan in `docs/changes/<branch name>/`; the MVP's are in `docs/changes/mvp/`. See `AGENTS.md`.
 
 ## Still to do (manual checks)
 
