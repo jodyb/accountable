@@ -9,6 +9,7 @@ Usage: uv run python -m accountable.crm.seed --reset [--today YYYY-MM-DD]
 import argparse
 import random
 from datetime import date, datetime, time, timedelta
+from pathlib import Path
 
 from sqlalchemy import Connection, delete, insert
 
@@ -321,22 +322,30 @@ def _load_activities(conn, rng, today, deal_rows, contact_ids, industries) -> No
         conn.execute(insert(activities).values(**r, created_at=stamp(r["occurred_on"])))
 
 
+def reset_database(path: Path, today: date) -> None:
+    """Migrate the file, then replace its data with the sample data in one transaction.
+
+    The file is emptied in place, not deleted, so a dev server that is running
+    keeps working and shows the new data.
+    """
+    engine = db.make_engine(path)
+    migrate.upgrade(engine)
+    with engine.begin() as conn:
+        reset(conn)
+        load(conn, today)
+    engine.dispose()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Reset the database to the sample data.")
-    parser.add_argument("--reset", action="store_true", help="delete the database file and start again")
+    parser.add_argument("--reset", action="store_true", help="replace any existing data with the sample data")
     parser.add_argument("--today", type=date.fromisoformat, default=date.today(), help="YYYY-MM-DD")
     args = parser.parse_args()
 
     path = config.db_path()
-    if path.exists():
-        if not args.reset:
-            raise SystemExit(f"{path} already exists. Use --reset to replace it.")
-        path.unlink()
-    engine = db.make_engine(path)
-    migrate.upgrade(engine)
-    with engine.begin() as conn:
-        load(conn, args.today)
-    engine.dispose()
+    if path.exists() and not args.reset:
+        raise SystemExit(f"{path} already exists. Use --reset to replace its data.")
+    reset_database(path, args.today)
     print(f"Sample data loaded into {path}")
 
 

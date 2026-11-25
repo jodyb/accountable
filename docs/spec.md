@@ -133,7 +133,7 @@ Structure rules:
 ### Scripts
 
 - `dev`: `concurrently` runs `uv run uvicorn accountable.main:app --port 8000` and `npm run dev -w frontend`. The backend applies pending migrations as it starts.
-- `seed`: `uv run python -m accountable.crm.seed --reset`: deletes the database, migrates a new one and loads the sample data.
+- `seed`: `uv run python -m accountable.crm.seed --reset`: migrates the database (creating it if missing), then empties its tables and loads the sample data in one transaction. The file is kept, so a running dev server keeps working.
 - `types`: `uv run python -m accountable.openapi` writes the OpenAPI schema, then `openapi-typescript` turns it into `frontend/src/lib/api-types.ts`.
 - `test`: checks the generated types are current and the frontend type-checks, then Vitest, pytest and Playwright. Playwright's `webServer` starts both servers with `ACCOUNTABLE_DB` pointing at a temp file and seeds it.
 - `postinstall`: `uv sync`.

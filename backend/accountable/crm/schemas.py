@@ -35,7 +35,9 @@ OrgName = Annotated[str, _required_text("Enter a name.")]
 ContactName = Annotated[str, _required_text("Enter a name.")]
 DealName = Annotated[str, _required_text("Enter a deal name.")]
 Description = Annotated[str, _required_text("Enter a description.")]
-ValueCents = Annotated[int, Field(ge=0)]
+# Up to $1 trillion: well inside SQLite's 64-bit integers, so a huge value is a 422, not a crash.
+MAX_VALUE_CENTS = 100_000_000_000_000
+ValueCents = Annotated[int, Field(ge=0, le=MAX_VALUE_CENTS)]
 Probability = Annotated[int, Field(ge=0, le=100)]
 
 
@@ -146,6 +148,7 @@ class DealIn(Input):
     value_cents: ValueCents
     probability: Probability | None = None
     close_date: date | None = None
+    today: date | None = Field(default=None, description="The browser's local date, the close date for a deal created Won or Lost")
 
 
 class DealPatch(Patch):

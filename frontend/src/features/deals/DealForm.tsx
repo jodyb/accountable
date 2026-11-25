@@ -92,7 +92,7 @@ function Body({ deal, stage, organizationId, contactId, onClose, onCreated }: Om
         const saved = await update.mutateAsync({ id: deal.id, body: { ...body, today: day } })
         notify((saved.stage !== deal.stage && stageMessage(saved.stage, day)) || 'Deal saved.')
       } else {
-        const saved = await create.mutateAsync(body)
+        const saved = await create.mutateAsync({ ...body, today: today() })
         notify(`${saved.name} added.`)
         onCreated?.(saved)
       }

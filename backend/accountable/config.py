@@ -6,6 +6,8 @@ from pathlib import Path
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_DB = BACKEND_DIR / "data" / "accountable.db"
 ALEMBIC_INI = BACKEND_DIR / "alembic.ini"
+# Host names the API answers to. Vite's proxy passes on the browser's localhost host.
+ALLOWED_HOSTS = ("localhost", "127.0.0.1")
 
 
 def db_path() -> Path:

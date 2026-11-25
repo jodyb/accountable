@@ -11,6 +11,9 @@ export default defineConfig({
   server: {
     port: webPort,
     strictPort: true,
+    // Vite allows any localhost origin by default, and that reaches the /api proxy too.
+    // The app's pages are same-origin, so no other page needs CORS.
+    cors: false,
     proxy: { '/api': `http://127.0.0.1:${apiPort}` },
   },
   test: {

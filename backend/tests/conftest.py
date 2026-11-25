@@ -13,6 +13,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 
 from accountable import db, migrate  # noqa: E402
 from accountable.main import create_app  # noqa: E402
+from tests.factories import LOCAL  # noqa: E402
 
 
 @pytest.fixture(scope="session")
@@ -45,4 +46,4 @@ def engine(db_file):
 @pytest.fixture
 def client(engine) -> TestClient:
     """No lifespan: the database is already migrated and empty."""
-    return TestClient(create_app())
+    return TestClient(create_app(), base_url=LOCAL)

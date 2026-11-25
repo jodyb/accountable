@@ -24,6 +24,10 @@ describe('deal form', () => {
     expect(messages({ ...emptyDeal(), name: 'D', value: '100', probability: '101' })).toHaveProperty('probability')
     expect(messages({ ...emptyDeal(), name: 'D', value: '100', probability: '' })).toHaveProperty('probability')
   })
+  it('caps the value at the API limit of $1 trillion', () => {
+    expect(messages({ ...emptyDeal(), name: 'D', value: '1000000000000' })).toEqual({})
+    expect(messages({ ...emptyDeal(), name: 'D', value: '1000000000001' })).toEqual({ value: 'Enter at most $1,000,000,000,000.' })
+  })
   it('sends value in cents', () => {
     expect(toDealBody({ ...emptyDeal(), name: 'D', value: '48,500' })).toMatchObject({ value_cents: 4_850_000, probability: 10, close_date: null })
   })

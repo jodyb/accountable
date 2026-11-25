@@ -38,6 +38,33 @@ def test_missing_record_is_404(client, method, path):
     assert response.json()["detail"].endswith("not found")
 
 
+def test_a_huge_value_is_a_field_error_not_a_crash(client):
+    response = client.post("/api/deals", json={"name": "Huge", "value_cents": 10**20})
+    assert response.status_code == 422
+    assert response.json()["errors"] == {"value_cents": "Must be at most 100000000000000."}
+    assert client.post("/api/deals", json={"name": "Max", "value_cents": 10**14}).status_code == 201
+
+
+def test_other_local_pages_are_not_allowed_to_call_the_api(client):
+    """The browser reaches the API through Vite's proxy, so no origin needs CORS."""
+    origin = {"Origin": "http://localhost:3000"}
+    assert "access-control-allow-origin" not in client.get("/api/organizations", headers=origin).headers
+    preflight = client.options(
+        "/api/organizations", headers={**origin, "Access-Control-Request-Method": "POST"}
+    )
+    assert "access-control-allow-origin" not in preflight.headers
+
+
+@pytest.mark.parametrize("host", ["localhost", "127.0.0.1", "localhost:8000", "127.0.0.1:5173"])
+def test_local_host_names_are_answered(client, host):
+    assert client.get("/api/health", headers={"Host": host}).status_code == 200
+
+
+@pytest.mark.parametrize("host", ["attacker.example", "attacker.example:8000", "localhost.attacker.example"])
+def test_other_host_names_are_refused_against_dns_rebinding(client, host):
+    assert client.get("/api/organizations", headers={"Host": host}).status_code == 400
+
+
 def test_invalid_input_is_422_with_a_message_per_field(client):
     response = client.post("/api/deals", json={"name": "", "stage": "Pending", "value_cents": -5})
     assert response.status_code == 422

@@ -1,5 +1,5 @@
 // S4: the board, dragging between and within columns, totals, rollback, and adding in a column.
-import { allowConsoleError, card, cardNames, column, drag, expect, panel, row, test, toast } from './helpers'
+import { allowConsoleError, card, cardNames, column, drag, expect, panel, row, test, toast, TODAY } from './helpers'
 
 // Tall enough that every card is on screen: a mouse drag doesn't scroll the page.
 test.use({ viewport: { width: 1440, height: 1500 } })
@@ -111,6 +111,21 @@ test('a failed save puts the card and totals back and says so', async ({ page })
   await expect(column(page, 'Lost').locator('[data-deal="ERP integration"]')).toHaveCount(0)
   await expect(value).toHaveText('$790,800 USD')
   await expect(column(page, 'Proposal').getByTestId('col-count')).toHaveText('5')
+})
+
+test('a deal added in the Won column closes today and counts as won on the dashboard', async ({ page, request }) => {
+  const kpis = async () => (await (await request.get(`/api/dashboard?today=${TODAY}`)).json()).kpis
+  const before = await kpis()
+  await page.getByRole('button', { name: 'Add deal in Won' }).click()
+  const form = panel(page, 'New deal')
+  await form.getByLabel('Deal name').fill('Signed at the trade show')
+  await form.getByLabel('Value (USD)').fill('7000')
+  await form.getByRole('button', { name: 'Save deal' }).click()
+  await expect(form).toBeHidden()
+  await expect(card(page, 'Signed at the trade show')).toContainText('Nov 24')
+  const after = await kpis()
+  expect(after.won_this_month_count).toBe(before.won_this_month_count + 1)
+  expect(after.won_this_month_cents).toBe(before.won_this_month_cents + 700_000)
 })
 
 test('"Add deal" in a column opens the form at that stage; the card appears at the top', async ({ page }) => {

@@ -31,6 +31,7 @@ export function toActivityBody(v: ActivityValues): ActivityIn {
     description: v.description.trim(),
     occurred_on: v.occurred_on,
     follow_up_on: v.follow_up_on || null,
-    done: v.done,
+    // "Done" belongs to a follow-up. Without one it is cleared, so a follow-up added later starts open.
+    done: v.follow_up_on ? v.done : false,
   }
 }

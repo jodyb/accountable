@@ -30,7 +30,7 @@ References used below:
 | `alembic.ini` | Alembic config, script location `migrations/` |
 | `migrations/env.py` | reads the shared metadata and `ACCOUNTABLE_DB`; batch mode for SQLite |
 | `migrations/versions/0001_crm_tables.py` | first migration: the four CRM tables, constraints and indexes |
-| `accountable/main.py` | builds the app, applies pending migrations on start, seeds a new database, mounts area routers under `/api`, CORS for Vite |
+| `accountable/main.py` | builds the app, applies pending migrations on start, seeds a new database, mounts area routers under `/api`; no CORS, and only local host names are answered (DNS rebinding) |
 | `accountable/config.py` | settings; database path from `ACCOUNTABLE_DB`, default `backend/data/accountable.db` |
 | `accountable/db.py` | engine, `PRAGMA foreign_keys=ON`, shared metadata, connection dependency |
 | `accountable/openapi.py` | writes the OpenAPI schema for frontend type generation |
@@ -48,7 +48,7 @@ References used below:
 
 | File | Purpose |
 |---|---|
-| `package.json`, `vite.config.ts`, `tsconfig*.json`, `index.html` | Vite + React + TypeScript, `/api` proxy, Vitest config; the D5 libraries (React Router, TanStack Query and Table, React Hook Form, Zod, Recharts, dnd-kit, Radix UI, Lucide, date-fns, @fontsource, openapi-typescript) |
+| `package.json`, `vite.config.ts`, `tsconfig*.json`, `index.html` | Vite + React + TypeScript, `/api` proxy with Vite's CORS off, Vitest config; the D5 libraries (React Router, TanStack Query and Table, React Hook Form, Zod, Recharts, dnd-kit, Radix UI, Lucide, date-fns, @fontsource, openapi-typescript) |
 | `src/main.tsx` | entry point |
 | `src/app/` | `App.tsx` (router, query client), `Layout.tsx`, `Sidebar.tsx`, `nav.ts` (the one list of sections) |
 | `src/theme/tokens.css`, `src/theme/fonts.ts` | brand tokens as CSS variables (ready for a later dark mode), self-hosted fonts |

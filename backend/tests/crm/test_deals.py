@@ -43,6 +43,33 @@ def test_deal_created_at_another_stage_takes_its_probability_and_tops_the_column
     assert f.ok(client.get(f"/api/deals/{first['id']}"))["position"] == 1
 
 
+def test_deal_created_won_closes_today_and_makes_the_contact_a_customer(client):
+    c = f.contact(client)
+    d = f.deal(client, stage="Won", contact_id=c["id"], today=f.TODAY)
+    assert (d["probability"], d["close_date"]) == (100, f.TODAY)
+    assert f.ok(client.get(f"/api/contacts/{c['id']}"))["status"] == "customer"
+    kpis = f.ok(client.get(f"/api/dashboard?today={f.TODAY}"))["kpis"]
+    assert (kpis["won_this_month_count"], kpis["won_12m_count"]) == (1, 1)
+    assert f.ok(client.get(f"/api/deals/{d['id']}/timeline")) == []  # no stage change happened
+
+
+def test_deal_created_lost_closes_today_and_leaves_the_contact(client):
+    c = f.contact(client)
+    d = f.deal(client, stage="Lost", contact_id=c["id"], today=f.TODAY)
+    assert (d["probability"], d["close_date"]) == (0, f.TODAY)
+    assert f.ok(client.get(f"/api/contacts/{c['id']}"))["status"] == "lead"
+    assert f.ok(client.get(f"/api/dashboard?today={f.TODAY}"))["kpis"]["lost_12m_count"] == 1
+
+
+def test_deal_created_closed_keeps_a_given_close_date(client):
+    d = f.deal(client, stage="Won", close_date="2026-09-03", today=f.TODAY)
+    assert d["close_date"] == "2026-09-03"
+
+
+def test_open_deal_created_without_close_date_has_none(client):
+    assert f.deal(client, stage="Proposal", today=f.TODAY)["close_date"] is None
+
+
 def test_given_probability_is_kept_on_create(client):
     assert f.deal(client, probability=35)["probability"] == 35
 

@@ -19,7 +19,7 @@ The first start creates `backend/data/accountable.db` and fills it with sample d
 
 | Command | What it does |
 |---|---|
-| `npm run seed` | Deletes the database and reloads the sample data |
+| `npm run seed` | Replaces all data with the sample data (safe while `npm run dev` runs) |
 | `npm test` | API type check, TypeScript checks, Vitest, pytest, then Playwright; fails if any fail |
 | `npm run types` | Regenerates `frontend/src/lib/api-types.ts` after an API change |
 
@@ -44,9 +44,22 @@ Review the file it writes in `backend/migrations/versions/`, and commit it with 
 - **Phases 5 to 7:** tables with search, sort, filter and empty states; record pages with timelines and activity logging; the drag-and-drop pipeline with optimistic totals and rollback; the dashboard with KPI tiles, line and bar charts, funnel, recent activity and follow-ups.
 - **Phase 8:** console-error and external-request checks on every e2e test; layout checks at 1280px; dashboard, pipeline, deal page and New contact form compared with their `a-` mockups by screenshot.
 
-Test counts: 152 pytest, 64 Vitest, 42 Playwright.
+Test counts: 166 pytest, 66 Vitest, 45 Playwright.
 
 - **Mockup review (M5):** all ten screens captured at 1440px and compared with their `a-` mockups. Fixed: a global `.ghost` rule from the pipeline drag faded every secondary button to 35% opacity (now `.card-leaving`, with an e2e check); stage names in timeline entries are now bold; selects use the mockup's chevron.
+
+## Review findings (`docs/review.md`, branch `mvp` against `main`)
+
+| # | Pass | Severity | Finding | State |
+|---|---|---|---|---|
+| 1 | Bugs | Important | A deal created at Won or Lost (the column's "+ Add deal", or the stage select in New deal) got no close date and its contact stayed a lead, so the dashboard's won figures, charts and win rate left it out while the tables showed it (R33). | Fixed: created Won or Lost, a deal closes on the browser's today unless a close date is given, and Won makes its contact a customer. pytest and e2e cover it. |
+| 2 | Bugs | Important | `npm run seed` deleted the database file, so a running dev server kept the old file open and every write failed with 500 until restart. | Fixed: the seed empties and reloads the tables in place, in one transaction. A pytest runs it under a live app. |
+| 3 | Security | Important | CORS let any `http://localhost:*` page read and change all data. Removing it from FastAPI wasn't enough: Vite's own default CORS allows any localhost origin and applies to the `/api` proxy. | Fixed: CORS off in FastAPI and in Vite (`server.cors: false`). A pytest checks FastAPI; an e2e test (`security.spec.ts`) checks a preflight through Vite. |
+| 7 | Security | Should fix | The API on port 8000 answered any `Host`, so a website using DNS rebinding could reach it. | Fixed: `TrustedHostMiddleware` answers only `localhost` and `127.0.0.1`; pytest covers allowed and refused hosts. |
+| 8 | Spec | Should fix | `spec.md` (D2) still said the seed deletes the database, and `plan.md` listed CORS for Vite. | Fixed: both documents describe what the code does. |
+| 4 | Plan | Process | Phase 8's manual checks (M1, M2, M8) are still open, and the build went in as one commit rather than one per phase. | Open: the manual checks need a person; the commit history stays as it is. |
+| 5 | Bugs | Nit | A deal value too big for SQLite (over about $92 quadrillion) crashed with 500 instead of a field message. | Fixed: values are capped at $1 trillion in the API (422) and the form. |
+| 6 | Bugs | Nit | An activity could be saved as done with no follow-up date, so a follow-up added later started out done and never reached the dashboard. | Fixed: the form clears done when there is no follow-up date. |
 
 ## Still to do (manual checks)
 
@@ -62,4 +75,7 @@ Test counts: 152 pytest, 64 Vitest, 42 Playwright.
 - Deleting a contact deletes every activity linked to them, including stage changes on their deals that were linked to them. This follows the spec's CASCADE rule.
 - The funnel is drawn with plain bars, not Recharts, to match mockup A. It has hover tooltips like the charts.
 - Playwright resets its database through `POST /api/test/reseed`, which exists only when `ACCOUNTABLE_TEST=1`.
+- A deal created already Won or Lost isn't a stage change, so it gets no "Moved from" entry, but it closes (today's date unless one is given) and Won makes its contact a customer, so the dashboard counts it.
+- Neither the backend nor Vite sends CORS headers: the app's pages are same-origin with `/api` through Vite's proxy, so no other page needs them.
+- The backend answers only the host names `localhost` and `127.0.0.1`, against DNS rebinding. Test clients use `http://localhost` (`tests/factories.py`).
 - On the pipeline, cards stay in place while dragging. In the card's own column a gap opens; in another column a Sea Green line marks the drop spot. Moving cards between columns mid-drag caused render loops in dnd-kit.

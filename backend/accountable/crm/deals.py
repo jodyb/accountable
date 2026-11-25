@@ -96,13 +96,22 @@ def list_deals(conn: Connection = Depends(get_conn)):
 
 @router.post("", response_model=schemas.Deal, status_code=201)
 def create_deal(body: schemas.DealIn, conn: Connection = Depends(get_conn)):
-    """A new deal takes its stage's probability unless one is given, and goes to the top of its column."""
+    """A new deal takes its stage's probability unless one is given, and goes to the top of its column.
+
+    A deal created already Won or Lost is closed: it gets today's close date unless
+    one is given, and Won makes its main contact a customer, as a move would. No
+    stage-change entry is written, because the stage didn't change.
+    """
     check_organization(conn, body.organization_id)
     check_contact(conn, body.contact_id)
-    values = body.model_dump()
+    values = body.model_dump(exclude={"today"})
     if values["probability"] is None:
         values["probability"] = stages.DEFAULT_PROBABILITY[body.stage]
+    if body.stage in ("Won", "Lost") and values["close_date"] is None:
+        values["close_date"] = body.today or date.today()
     deal_id = conn.execute(insert(deals).values(**values, position=0)).inserted_primary_key[0]
+    if stages.makes_customer(body.stage) and body.contact_id is not None:
+        conn.execute(update(contacts).where(contacts.c.id == body.contact_id).values(status="customer"))
     place(conn, deal_id, body.stage, 0)
     return get_deal(conn, deal_id)
 

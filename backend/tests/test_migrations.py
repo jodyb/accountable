@@ -9,6 +9,7 @@ from sqlalchemy import inspect, insert, select
 from accountable import db, migrate
 from accountable.crm.tables import organizations
 from accountable.main import create_app
+from tests.factories import LOCAL
 
 CRM_TABLES = {"organizations", "contacts", "deals", "activities"}
 
@@ -75,10 +76,10 @@ def test_start_upgrades_an_out_of_date_database_and_keeps_its_data(db_file):
             conn.execute(insert(organizations).values(name="Kept Ltd"))
     engine.dispose()
 
-    with TestClient(create_app()) as client:  # runs the start-up migration
+    with TestClient(create_app(), base_url=LOCAL) as client:  # runs the start-up migration
         if previous == "base":
             client.post("/api/organizations", json={"name": "Kept Ltd"})
-    with TestClient(create_app()) as client:  # a second start leaves data alone
+    with TestClient(create_app(), base_url=LOCAL) as client:  # a second start leaves data alone
         names = [o["name"] for o in client.get("/api/organizations").json()]
     assert names == ["Kept Ltd"]
 
@@ -92,6 +93,6 @@ def test_start_migrates_an_empty_existing_file_without_seeding(tmp_path, monkeyp
     path = tmp_path / "empty.db"
     path.touch()
     monkeypatch.setenv("ACCOUNTABLE_DB", str(path))
-    with TestClient(create_app()) as client:
+    with TestClient(create_app(), base_url=LOCAL) as client:
         assert client.get("/api/organizations").json() == []
     assert CRM_TABLES <= set(inspect(db.make_engine(path)).get_table_names())

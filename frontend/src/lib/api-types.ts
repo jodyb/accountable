@@ -150,6 +150,10 @@ export interface paths {
         /**
          * Create Deal
          * @description A new deal takes its stage's probability unless one is given, and goes to the top of its column.
+         *
+         *     A deal created already Won or Lost is closed: it gets today's close date unless
+         *     one is given, and Won makes its main contact a customer, as a move would. No
+         *     stage-change entry is written, because the stage didn't change.
          */
         post: operations["create_deal_api_deals_post"];
         delete?: never;
@@ -653,6 +657,11 @@ export interface components {
              * @enum {string}
              */
             stage: "New" | "Qualified" | "Proposal" | "Negotiation" | "Won" | "Lost";
+            /**
+             * Today
+             * @description The browser's local date, the close date for a deal created Won or Lost
+             */
+            today?: string | null;
             /** Value Cents */
             value_cents: number;
         };

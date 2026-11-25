@@ -35,6 +35,11 @@ describe('activity form', () => {
     expect(messages({ ...filled, contact_id: '3' })).toEqual({})
     expect(messages({ ...filled, deal_id: '4' })).toEqual({})
   })
+  it('clears done when there is no follow-up, so one added later starts open', () => {
+    const filled = { ...base, description: 'Call', occurred_on: '2026-11-24', deal_id: '4', done: true }
+    expect(toActivityBody(filled).done).toBe(false)
+    expect(toActivityBody({ ...filled, follow_up_on: '2026-12-01' }).done).toBe(true)
+  })
   it('sends blanks as null', () => {
     expect(toActivityBody({ ...base, description: ' Call ', occurred_on: '2026-11-24', deal_id: '4' })).toEqual({
       type: 'note',

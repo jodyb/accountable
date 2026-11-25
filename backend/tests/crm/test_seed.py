@@ -12,6 +12,7 @@ from accountable import db
 from accountable.crm import seed
 from accountable.crm.tables import activities, contacts, deals, organizations
 from accountable.main import create_app
+from tests.factories import LOCAL
 
 TODAY = date(2026, 11, 24)
 
@@ -128,6 +129,16 @@ def test_reset_replaces_existing_data(engine):
     assert "Added by hand" not in names and len(names) == len(seed.ORGANIZATIONS)
 
 
+def test_reset_while_the_server_runs_keeps_it_working(db_file):
+    with TestClient(create_app(), base_url=LOCAL) as client:
+        f_org = {"name": "Added before reset"}
+        assert client.post("/api/organizations", json=f_org).status_code == 201
+        seed.reset_database(db_file, TODAY)
+        names = [o["name"] for o in client.get("/api/organizations").json()]
+        assert "Added before reset" not in names and len(names) == len(seed.ORGANIZATIONS)
+        assert client.post("/api/organizations", json={"name": "Added after reset"}).status_code == 201
+
+
 def test_dashboard_has_figures_for_every_widget(engine, client):
     with engine.begin() as conn:
         seed.load(conn, TODAY)
@@ -144,7 +155,7 @@ def test_dashboard_has_figures_for_every_widget(engine, client):
 def test_missing_database_is_created_and_seeded_on_start(tmp_path, monkeypatch):
     path = tmp_path / "fresh" / "accountable.db"
     monkeypatch.setenv("ACCOUNTABLE_DB", str(path))
-    with TestClient(create_app()) as client:
+    with TestClient(create_app(), base_url=LOCAL) as client:
         assert len(client.get("/api/organizations").json()) == len(seed.ORGANIZATIONS)
     assert path.exists()
 
@@ -154,5 +165,5 @@ def test_existing_database_is_left_alone_on_start(db_file):
     with engine.begin() as conn:
         conn.execute(organizations.insert().values(name="Only one"))
     engine.dispose()
-    with TestClient(create_app()) as client:
+    with TestClient(create_app(), base_url=LOCAL) as client:
         assert [o["name"] for o in client.get("/api/organizations").json()] == ["Only one"]

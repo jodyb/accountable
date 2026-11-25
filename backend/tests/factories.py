@@ -4,6 +4,9 @@ from fastapi.testclient import TestClient
 
 TODAY = "2026-11-24"
 
+# The API only answers to local host names (TrustedHostMiddleware), so test clients use one.
+LOCAL = "http://localhost"
+
 
 def ok(response, status: int = 200):
     assert response.status_code == status, response.text

@@ -3,6 +3,9 @@ import type { DealIn, Stage } from '../../lib/api'
 import { dollarsToCents } from '../../lib/format'
 import { DEFAULT_PROBABILITY, STAGES } from './stages'
 
+/** The API's limit: $1 trillion. */
+export const MAX_VALUE_CENTS = 100_000_000_000_000
+
 export const dealSchema = z.object({
   name: z.string().trim().min(1, 'Enter a deal name.'),
   organization_id: z.string(),
@@ -12,7 +15,8 @@ export const dealSchema = z.object({
     .string()
     .trim()
     .min(1, 'Enter a value.')
-    .refine((v) => v === '' || dollarsToCents(v) !== null, 'Enter an amount in US dollars, like 48500.'),
+    .refine((v) => v === '' || dollarsToCents(v) !== null, 'Enter an amount in US dollars, like 48500.')
+    .refine((v) => (dollarsToCents(v) ?? 0) <= MAX_VALUE_CENTS, 'Enter at most $1,000,000,000,000.'),
   probability: z
     .string()
     .trim()

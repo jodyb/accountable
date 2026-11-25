@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from datetime import date
 
 from fastapi import APIRouter, Depends, FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from sqlalchemy import Connection
 
 from accountable import config, crm, db, errors, migrate
@@ -43,13 +43,11 @@ def test_router() -> APIRouter:
 
 
 def create_app() -> FastAPI:
+    # No CORS here, and none in Vite (vite.config.ts), so other pages on this
+    # computer can't read or change the data through either port.
     app = FastAPI(title="Accountable", version="0.1.0", lifespan=lifespan)
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origin_regex=r"http://(localhost|127\.0\.0\.1):\d+",
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+    # Only local host names, so a website using DNS rebinding can't reach the API.
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=list(config.ALLOWED_HOSTS))
     errors.install(app)
 
     api = APIRouter(prefix="/api")
