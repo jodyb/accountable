@@ -1,0 +1,27 @@
+{
+  "name": "accountable",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Accountable: a sales CRM, the first part of a business OS",
+  "workspaces": [
+    "frontend"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "postinstall": "uv sync",
+    "dev": "concurrently --kill-others-on-fail --names api,web --prefix-colors cyan,green \"uv run uvicorn accountable.main:app --port 8000 --reload --reload-dir backend/accountable\" \"npm run dev -w frontend\"",
+    "seed": "uv run python -m accountable.crm.seed --reset",
+    "types": "uv run python -m accountable.openapi frontend/openapi.json && npm run types -w frontend",
+    "types:check": "uv run python -m accountable.openapi frontend/openapi.json && npm run types:check -w frontend",
+    "test": "npm run types:check && npm run typecheck -w frontend && npm run typecheck:e2e && npm run test -w frontend && uv run pytest && playwright test",
+    "test:e2e": "playwright test",
+    "typecheck:e2e": "tsc -p e2e/tsconfig.json"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "@types/node": "^26.6.6",
+    "concurrently": "^10.0.7"
+  }
+}

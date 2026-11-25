@@ -18,6 +18,9 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Generated OpenAPI schema (the types made from it are committed)
+frontend/openapi.json
+
 # Playwright
 test-results/
 playwright-report/
@@ -43,7 +46,8 @@ htmlcov/
 coverage.xml
 coverage/
 
-# Local databases
+# Local databases (the app's data lives in backend/data/)
+backend/data/
 *.db
 *.sqlite
 *.sqlite3
