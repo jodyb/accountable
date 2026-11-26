@@ -9,6 +9,7 @@ Read these first, in this order:
 1. `docs/spec.md`: the whole product as it stands today. It is the authority on what Accountable does.
 2. `docs/TECH_STACK.md`: the stack
 3. `docs/STATUS.md`: how to run it and what's done so far
+4. `docs/STANDARDS.md`: the coding guidelines all code follows
 
 ## Changes
 
