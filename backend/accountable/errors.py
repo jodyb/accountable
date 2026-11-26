@@ -26,7 +26,9 @@ class FieldError(Exception):
 
 
 def _response(errors: dict[str, str]) -> JSONResponse:
-    return JSONResponse(status_code=422, content={"detail": "Check the highlighted fields.", "errors": errors})
+    return JSONResponse(
+        status_code=422, content={"detail": "Check the highlighted fields.", "errors": errors}
+    )
 
 
 def _field_name(loc: tuple) -> str:

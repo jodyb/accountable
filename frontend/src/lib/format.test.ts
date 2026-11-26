@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { dollarsToCents, displayDate, longDate, messageDate, money, moneyCompact, percent, shortDate } from './format'
+import {
+  dollarsToCents,
+  displayDate,
+  longDate,
+  messageDate,
+  money,
+  moneyCompact,
+  percent,
+  shortDate,
+} from './format'
 
 describe('money', () => {
   it('shows full dollars with the currency', () => {

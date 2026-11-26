@@ -4,9 +4,9 @@
   /* Brand */
   --seagreen: #06d6a0;
   --seagreen-tint: #7de8cb;
-  --seagreen-ink: #047857;   /* Sea Green darkened for text on white */
+  --seagreen-ink: #047857; /* Sea Green darkened for text on white */
   --marigold: #ffc145;
-  --marigold-ink: #9a6a00;   /* Marigold darkened for text on white */
+  --marigold-ink: #9a6a00; /* Marigold darkened for text on white */
   --coral: #f78c6b;
   --coral-ink: #b4532f;
   --cerulean: #118ab2;
@@ -44,9 +44,9 @@
   --radius: 14px;
 
   /* Type */
-  --font-sans: "Instrument Sans", system-ui, sans-serif;
-  --font-serif: "Instrument Serif", Georgia, serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: 'Instrument Sans', system-ui, sans-serif;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   color-scheme: light;
 }

@@ -6,7 +6,11 @@ const otherPage = { Origin: 'http://localhost:3000' }
 test('a preflight from another local origin gets no CORS permission', async ({ request }) => {
   const response = await request.fetch('/api/organizations', {
     method: 'OPTIONS',
-    headers: { ...otherPage, 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'content-type' },
+    headers: {
+      ...otherPage,
+      'Access-Control-Request-Method': 'POST',
+      'Access-Control-Request-Headers': 'content-type',
+    },
   })
   expect(response.headers()['access-control-allow-origin']).toBeUndefined()
 })

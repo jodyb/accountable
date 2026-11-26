@@ -45,7 +45,12 @@ function dealCols(day: string): Col<Deal>[] {
       ),
     },
     { id: 'stage', header: 'Stage', cell: (d) => <StageBadge stage={d.stage} /> },
-    { id: 'value', header: 'Value', align: 'right', cell: (d) => <span className="num">{money(d.value_cents)}</span> },
+    {
+      id: 'value',
+      header: 'Value',
+      align: 'right',
+      cell: (d) => <span className="num">{money(d.value_cents)}</span>,
+    },
     { id: 'close', header: 'Close date', cell: (d) => <CloseDate deal={d} today={day} /> },
   ]
 }
@@ -99,7 +104,12 @@ export function OrganizationPage() {
               <dt>Website</dt>
               <dd>
                 {o.website ? (
-                  <a className="link" href={`https://${o.website.replace(/^https?:\/\//, '')}`} target="_blank" rel="noreferrer">
+                  <a
+                    className="link"
+                    href={`https://${o.website.replace(/^https?:\/\//, '')}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
                     {o.website}
                   </a>
                 ) : (
@@ -135,7 +145,14 @@ export function OrganizationPage() {
                 <Plus size={14} /> Add contact
               </button>
             </div>
-            <DataTable label="Contacts" scroll={false} rows={o.contacts} columns={contactCols} rowId={(c) => c.id} empty="No contacts yet. Add one with Add contact." />
+            <DataTable
+              label="Contacts"
+              scroll={false}
+              rows={o.contacts}
+              columns={contactCols}
+              rowId={(c) => c.id}
+              empty="No contacts yet. Add one with Add contact."
+            />
           </div>
           <div className="panel flush">
             <div className="ph pad">
@@ -144,12 +161,23 @@ export function OrganizationPage() {
                 <Plus size={14} /> New deal
               </button>
             </div>
-            <DataTable label="Deals" scroll={false} rows={o.deals} columns={dealCols(today())} rowId={(d) => d.id} empty="No deals yet. Add one with New deal." />
+            <DataTable
+              label="Deals"
+              scroll={false}
+              rows={o.deals}
+              columns={dealCols(today())}
+              rowId={(d) => d.id}
+              empty="No deals yet. Add one with New deal."
+            />
           </div>
         </div>
       </div>
       <OrganizationForm open={editing} organization={o} onClose={() => setEditing(false)} />
-      <ContactForm open={addingContact} organizationId={o.id} onClose={() => setAddingContact(false)} />
+      <ContactForm
+        open={addingContact}
+        organizationId={o.id}
+        onClose={() => setAddingContact(false)}
+      />
       <DealForm open={addingDeal} organizationId={o.id} onClose={() => setAddingDeal(false)} />
       <DeleteDialog
         kind="organization"

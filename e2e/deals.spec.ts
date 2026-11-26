@@ -60,9 +60,21 @@ test('search, sort and the empty state', async ({ page }) => {
   await expect(rows(page).first()).toContainText('Multi-site licence')
 })
 
-test('the table shows stage, value, probability, expected revenue and close date', async ({ page }) => {
+test('the table shows stage, value, probability, expected revenue and close date', async ({
+  page,
+}) => {
   await page.goto('/deals')
-  await expect(page.getByRole('columnheader')).toHaveText(['Deal', 'Organization', 'Main contact', 'Stage', 'Value', 'Prob.', 'Expected', 'Close date', ''])
+  await expect(page.getByRole('columnheader')).toHaveText([
+    'Deal',
+    'Organization',
+    'Main contact',
+    'Stage',
+    'Value',
+    'Prob.',
+    'Expected',
+    'Close date',
+    '',
+  ])
   const r = row(page, 'Multi-site licence')
   await expect(r).toContainText('Negotiation')
   await expect(r).toContainText('$120,000 USD')
@@ -72,7 +84,12 @@ test('the table shows stage, value, probability, expected revenue and close date
 
 test('late deals show a Raspberry close date and a Late tag', async ({ page }) => {
   await page.goto('/deals')
-  for (const name of ['Store analytics', 'POS rollout phase 2', 'Annual support renewal', 'Design workstation leasing']) {
+  for (const name of [
+    'Store analytics',
+    'POS rollout phase 2',
+    'Annual support renewal',
+    'Design workstation leasing',
+  ]) {
     const cell = row(page, name).locator('td').nth(7)
     await expect(cell.getByText('Late')).toBeVisible()
     await expect(cell.locator('.late-d')).toHaveCSS('color', 'rgb(196, 45, 82)')
@@ -93,7 +110,9 @@ test('the deal page links to its organization and main contact', async ({ page }
   await expect(page.getByRole('heading', { level: 1, name: 'Atlas Engineering' })).toBeVisible()
 })
 
-test('changing stage in the edit form updates probability and adds a timeline entry', async ({ page }) => {
+test('changing stage in the edit form updates probability and adds a timeline entry', async ({
+  page,
+}) => {
   await page.goto('/deals')
   await row(page, 'Patient portal').locator('td').first().click()
   await expect(page.getByRole('heading', { level: 1, name: 'Patient portal' })).toBeVisible()

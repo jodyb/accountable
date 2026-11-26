@@ -31,16 +31,36 @@ DEAL = {"name": "Deal", "stage": "New", "value_cents": 100, "probability": 10}
         (deals, {**DEAL, "probability": 101}),
         (deals, {**DEAL, "stage": "Pending"}),
         (contacts, {"name": "X", "status": "prospect"}),
-        (activities, {"type": "meeting", "description": "x", "occurred_on": date(2026, 1, 1), "deal_id": None}),
+        (
+            activities,
+            {
+                "type": "meeting",
+                "description": "x",
+                "occurred_on": date(2026, 1, 1),
+                "deal_id": None,
+            },
+        ),
         (activities, {"type": "note", "description": "x", "occurred_on": date(2026, 1, 1)}),
     ],
-    ids=["negative value", "probability below 0", "probability above 100", "unknown stage",
-         "unknown status", "unknown activity type", "activity with no contact or deal"],
+    ids=[
+        "negative value",
+        "probability below 0",
+        "probability above 100",
+        "unknown stage",
+        "unknown status",
+        "unknown activity type",
+        "activity with no contact or deal",
+    ],
 )
 def test_check_constraints_reject_bad_values(engine, table, values):
     if table is activities and values["type"] == "meeting":
         with engine.begin() as conn:
-            values = {**values, "contact_id": conn.execute(insert(contacts).values(name="C")).inserted_primary_key[0]}
+            values = {
+                **values,
+                "contact_id": conn.execute(insert(contacts).values(name="C")).inserted_primary_key[
+                    0
+                ],
+            }
     with pytest.raises(IntegrityError), engine.begin() as conn:
         conn.execute(insert(table).values(**values))
 

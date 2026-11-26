@@ -6,14 +6,16 @@ import tempfile
 from pathlib import Path
 
 # Before anything imports the app: never let a test touch the real database.
-os.environ["ACCOUNTABLE_DB"] = str(Path(tempfile.mkdtemp(prefix="accountable-tests-")) / "unused.db")
+os.environ["ACCOUNTABLE_DB"] = str(
+    Path(tempfile.mkdtemp(prefix="accountable-tests-")) / "unused.db"
+)
 
-import pytest  # noqa: E402
-from fastapi.testclient import TestClient  # noqa: E402
+import pytest
+from fastapi.testclient import TestClient
 
-from accountable import db, migrate  # noqa: E402
-from accountable.main import create_app  # noqa: E402
-from tests.factories import LOCAL  # noqa: E402
+from accountable import db, migrate
+from accountable.main import create_app
+from tests.factories import LOCAL
 
 
 @pytest.fixture(scope="session")

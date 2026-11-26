@@ -7,6 +7,7 @@ The MVP in `docs/changes/mvp/plan.md` is built, Phases 1 to 8. Every automated c
 - Node 24 or later (26 is the target)
 - [uv](https://docs.astral.sh/uv/) (it installs Python 3.12 for you)
 - Google Chrome, for the end-to-end tests
+- [gitleaks](https://github.com/gitleaks/gitleaks), for `npm run check` (`brew install gitleaks`)
 
 ## Install and run
 
@@ -20,7 +21,10 @@ The first start creates `backend/data/accountable.db` and fills it with sample d
 | Command | What it does |
 |---|---|
 | `npm run seed` | Replaces all data with the sample data (safe while `npm run dev` runs) |
-| `npm test` | API type check, TypeScript checks, Vitest, pytest, then Playwright; fails if any fail |
+| `npm run check` | gitleaks, Prettier, ruff format, ESLint, ruff check, ty, then everything in `npm test`; stops at the first failure and ends with a summary of each step and its time |
+| `npm run check:quick` | The same without the Playwright tests |
+| `npm run format` | Fixes formatting with Prettier and ruff format |
+| `npm test` | API type check, TypeScript checks, Vitest and pytest (80% coverage each), then Playwright; fails if any fail |
 | `npm run types` | Regenerates `frontend/src/lib/api-types.ts` after an API change |
 
 `npm test` starts its own servers on ports 8100 and 5174 with a database in a temp folder, so it never touches your data and can run alongside `npm run dev`.
@@ -44,7 +48,9 @@ Review the file it writes in `backend/migrations/versions/`, and commit it with 
 - **Phases 5 to 7:** tables with search, sort, filter and empty states; record pages with timelines and activity logging; the drag-and-drop pipeline with optimistic totals and rollback; the dashboard with KPI tiles, line and bar charts, funnel, recent activity and follow-ups.
 - **Phase 8:** console-error and external-request checks on every e2e test; layout checks at 1280px; dashboard, pipeline, deal page and New contact form compared with their `a-` mockups by screenshot.
 
-Test counts: 166 pytest, 66 Vitest, 45 Playwright.
+- **Harness, enforced standards:** `npm run check`, `check:quick` and `format` (see the table above). To pass them without loosening any rule: FastAPI routes take the connection as `Conn = Annotated[Connection, Depends(get_conn)]`; `db.insert_id` replaces the untyped `inserted_primary_key[0]`; the four forms build their defaults in `schema.ts` and focus their first field with React Hook Form's `setFocus` instead of `autoFocus`; `useWatch` replaces `watch`. Page-level Vitest tests against a fake API (`frontend/src/test/`) lifted frontend unit coverage from 23% to over 90%.
+
+Test counts: 166 pytest, 128 Vitest, 45 Playwright.
 
 - **Mockup review (M5):** all ten screens captured at 1440px and compared with their `a-` mockups. Fixed: a global `.ghost` rule from the pipeline drag faded every secondary button to 35% opacity (now `.card-leaving`, with an e2e check); stage names in timeline entries are now bold; selects use the mockup's chevron.
 

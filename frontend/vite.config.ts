@@ -21,5 +21,17 @@ export default defineConfig({
     setupFiles: ['./src/test-setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
     css: false,
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: [
+        'src/**/*.test.{ts,tsx}',
+        'src/test/**',
+        'src/test-setup.ts',
+        'src/lib/api-types.ts',
+      ],
+      reporter: ['text-summary', 'text'],
+      thresholds: { lines: 80, statements: 80, functions: 80, branches: 80 },
+    },
   },
 })

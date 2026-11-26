@@ -11,7 +11,11 @@ type Props = { deal: Deal; today: string; lifted?: boolean }
 export function DealCard({ deal, today, lifted }: Props) {
   const late = isLate(deal, today)
   return (
-    <div className={`card${late ? ' late' : ''}${lifted ? ' lifted' : ''}`} data-testid="deal-card" data-deal={deal.name}>
+    <div
+      className={`card${late ? ' late' : ''}${lifted ? ' lifted' : ''}`}
+      data-testid="deal-card"
+      data-deal={deal.name}
+    >
       <div className="cn">
         <Link to={`/deals/${deal.id}`} draggable={false}>
           {deal.name}
@@ -23,7 +27,9 @@ export function DealCard({ deal, today, lifted }: Props) {
         {late && <span className="late-tag">Late</span>}
       </div>
       <div className="cf">
-        <span className="cd num">{deal.close_date ? shortDate(deal.close_date) : 'No close date'}</span>
+        <span className="cd num">
+          {deal.close_date ? shortDate(deal.close_date) : 'No close date'}
+        </span>
         <span className="pr num">{percent(deal.probability)}</span>
       </div>
     </div>
@@ -31,7 +37,12 @@ export function DealCard({ deal, today, lifted }: Props) {
 }
 
 /** A card that can be dragged. While dragged within its column its slot shows the drop line; while headed for another column, a faint copy stays behind. */
-export function SortableDealCard({ deal, today, disabled, leaving }: Props & { disabled?: boolean; leaving?: boolean }) {
+export function SortableDealCard({
+  deal,
+  today,
+  disabled,
+  leaving,
+}: Props & { disabled?: boolean; leaving?: boolean }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: deal.id,
     data: { stage: deal.stage },
@@ -47,7 +58,10 @@ export function SortableDealCard({ deal, today, disabled, leaving }: Props & { d
       aria-label={deal.name}
     >
       {/* The slot keeps the card's height so the column doesn't shift under the pointer. */}
-      <div className={isDragging ? (leaving ? 'card-leaving' : 'slot') : undefined} data-testid={isDragging && !leaving ? 'drop-line' : undefined}>
+      <div
+        className={isDragging ? (leaving ? 'card-leaving' : 'slot') : undefined}
+        data-testid={isDragging && !leaving ? 'drop-line' : undefined}
+      >
         <DealCard deal={deal} today={today} />
       </div>
     </div>

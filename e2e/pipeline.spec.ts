@@ -1,5 +1,17 @@
 // S4: the board, dragging between and within columns, totals, rollback, and adding in a column.
-import { allowConsoleError, card, cardNames, column, drag, expect, panel, row, test, toast, TODAY } from './helpers'
+import {
+  allowConsoleError,
+  card,
+  cardNames,
+  column,
+  drag,
+  expect,
+  panel,
+  row,
+  test,
+  toast,
+  TODAY,
+} from './helpers'
 
 // Tall enough that every card is on screen: a mouse drag doesn't scroll the page.
 test.use({ viewport: { width: 1440, height: 1500 } })
@@ -9,9 +21,13 @@ test.beforeEach(async ({ page }) => {
   await expect(page.getByTestId('deal-card')).toHaveCount(40)
 })
 
-test('six columns; cards show name, organization, value, close date and Late when late', async ({ page }) => {
+test('six columns; cards show name, organization, value, close date and Late when late', async ({
+  page,
+}) => {
   await expect(page.locator('section[data-stage]')).toHaveCount(6)
-  const stages = await page.locator('section[data-stage]').evaluateAll((els) => els.map((e) => e.getAttribute('data-stage')))
+  const stages = await page
+    .locator('section[data-stage]')
+    .evaluateAll((els) => els.map((e) => e.getAttribute('data-stage')))
   expect(stages).toEqual(['New', 'Qualified', 'Proposal', 'Negotiation', 'Won', 'Lost'])
 
   const multi = card(page, 'Multi-site licence')
@@ -28,9 +44,13 @@ test('six columns; cards show name, organization, value, close date and Late whe
   await expect(page.locator('.card .late-tag')).toHaveCount(4)
 })
 
-test('drag to another column changes stage and probability, shown in the Deals table', async ({ page }) => {
+test('drag to another column changes stage and probability, shown in the Deals table', async ({
+  page,
+}) => {
   await drag(page, card(page, 'Fleet telematics pilot'), card(page, 'Warehouse scanners'), 'top')
-  await expect(column(page, 'Qualified').locator('[data-deal="Fleet telematics pilot"]')).toBeVisible()
+  await expect(
+    column(page, 'Qualified').locator('[data-deal="Fleet telematics pilot"]'),
+  ).toBeVisible()
   await expect(card(page, 'Fleet telematics pilot')).toContainText('25%')
   await page.waitForLoadState('networkidle')
 
@@ -39,7 +59,9 @@ test('drag to another column changes stage and probability, shown in the Deals t
   await expect(row(page, 'Fleet telematics pilot')).toContainText('25%')
 })
 
-test('drag to Won sets close date to today, makes the contact a customer and says so', async ({ page }) => {
+test('drag to Won sets close date to today, makes the contact a customer and says so', async ({
+  page,
+}) => {
   await drag(page, card(page, 'Clinic scheduling upgrade'), column(page, 'Won'), 'bottom')
   await expect(toast(page, 'Deal moved to Won. Close date set to 24 Nov 2026.')).toBeVisible()
   await expect(card(page, 'Clinic scheduling upgrade')).toContainText('Nov 24')
@@ -102,7 +124,9 @@ test('board and column totals change at once, before the server answers', async 
 
 test('a failed save puts the card and totals back and says so', async ({ page }) => {
   allowConsoleError(page, /status of 500|500 from POST \/api\/deals\/\d+\/move/)
-  await page.route('**/api/deals/*/move', (route) => route.fulfill({ status: 500, body: 'Server error' }))
+  await page.route('**/api/deals/*/move', (route) =>
+    route.fulfill({ status: 500, body: 'Server error' }),
+  )
   const value = page.getByTestId('board-value')
   await expect(value).toHaveText('$790,800 USD')
   await drag(page, card(page, 'ERP integration'), column(page, 'Lost'), 'bottom')
@@ -113,7 +137,10 @@ test('a failed save puts the card and totals back and says so', async ({ page })
   await expect(column(page, 'Proposal').getByTestId('col-count')).toHaveText('5')
 })
 
-test('a deal added in the Won column closes today and counts as won on the dashboard', async ({ page, request }) => {
+test('a deal added in the Won column closes today and counts as won on the dashboard', async ({
+  page,
+  request,
+}) => {
   const kpis = async () => (await (await request.get(`/api/dashboard?today=${TODAY}`)).json()).kpis
   const before = await kpis()
   await page.getByRole('button', { name: 'Add deal in Won' }).click()
@@ -128,7 +155,9 @@ test('a deal added in the Won column closes today and counts as won on the dashb
   expect(after.won_this_month_cents).toBe(before.won_this_month_cents + 700_000)
 })
 
-test('"Add deal" in a column opens the form at that stage; the card appears at the top', async ({ page }) => {
+test('"Add deal" in a column opens the form at that stage; the card appears at the top', async ({
+  page,
+}) => {
   await page.getByRole('button', { name: 'Add deal in Proposal' }).click()
   const form = panel(page, 'New deal')
   await expect(form.getByLabel('Stage')).toHaveValue('Proposal')
@@ -137,7 +166,9 @@ test('"Add deal" in a column opens the form at that stage; the card appears at t
   await form.getByLabel('Value (USD)').fill('12000')
   await form.getByRole('button', { name: 'Save deal' }).click()
   await expect(form).toBeHidden()
-  await expect.poll(() => cardNames(page, 'Proposal')).toEqual(expect.arrayContaining(['Harbor kiosks']))
+  await expect
+    .poll(() => cardNames(page, 'Proposal'))
+    .toEqual(expect.arrayContaining(['Harbor kiosks']))
   expect((await cardNames(page, 'Proposal'))[0]).toBe('Harbor kiosks')
   await page.reload()
   await expect(page.getByTestId('deal-card')).toHaveCount(41)

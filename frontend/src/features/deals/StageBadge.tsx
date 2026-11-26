@@ -12,7 +12,13 @@ export function StageBadge({ stage }: { stage: Stage }) {
 }
 
 /** Close date, in Raspberry with a Late tag when the deal is late. */
-export function CloseDate({ deal, today }: { deal: { stage: Stage; close_date: string | null }; today: string }) {
+export function CloseDate({
+  deal,
+  today,
+}: {
+  deal: { stage: Stage; close_date: string | null }
+  today: string
+}) {
   if (!deal.close_date) return <span className="none">None</span>
   const late = isLate(deal, today)
   return (

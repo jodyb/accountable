@@ -1,0 +1,9 @@
+# Used only by the working-tree scan in `npm run secrets`. The history scan uses
+# gitleaks' default rules, so a .env that somehow gets committed is still caught.
+[extend]
+useDefault = true
+
+# .env is git-ignored and holds the developer's own keys.
+[[allowlists]]
+description = "Local, git-ignored environment file"
+paths = ['''(^|/)\.env$''']

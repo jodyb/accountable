@@ -202,7 +202,13 @@ Structure rules:
 - `dev`: `concurrently` runs `uv run uvicorn accountable.main:app --port 8000 --reload` and `npm run dev -w frontend`. The backend applies pending migrations as it starts.
 - `seed`: `uv run python -m accountable.crm.seed --reset`: migrates the database (creating it if missing), then empties its tables and loads the sample data in one transaction. The file is kept, so a running dev server keeps working. Record ids start again from 1.
 - `types`: `uv run python -m accountable.openapi` writes the OpenAPI schema, then `openapi-typescript` turns it into `frontend/src/lib/api-types.ts`. `types:check` fails if that file is out of date.
-- `test`: the API type check, TypeScript checks (app and e2e), Vitest, pytest, then Playwright; it stops and exits non-zero at the first failure. Playwright's `webServer` starts its own servers on ports 8100 and 5174 with `ACCOUNTABLE_DB` pointing at a temp file, and reseeds before each test.
+- `test`: `test:unit` (the API type check, TypeScript checks for app and e2e, Vitest and pytest, each with at least 80% line, branch, function and statement coverage), then Playwright; it stops and exits non-zero at the first failure. Playwright's `webServer` starts its own servers on ports 8100 and 5174 with `ACCOUNTABLE_DB` pointing at a temp file, and reseeds before each test.
+- `check`: `scripts/check.mjs` runs each step below, then each part of `test`, one npm script at a time. It stops at the first failure, then prints a summary: each step as PASS, FAIL or SKIP with its time, and the total. `check:quick` passes `--quick`, which leaves out the end-to-end tests. Before the tests it runs:
+  - `secrets`: gitleaks over every branch's history with its default rules, then over the working tree, where only the git-ignored `.env` is allowed (`.gitleaks-worktree.toml`).
+  - `format:check`: Prettier (frontend, e2e, root configs) and `ruff format --check`.
+  - `lint`: ESLint with the recommended JavaScript, TypeScript, React Hooks and jsx-a11y rules and no warnings allowed, then `ruff check`. Both cap cyclomatic complexity at 15 per function (ESLint `complexity`, ruff `C901`).
+  - `typecheck:py`: ty over `backend/`. The frontend's tsc runs in `test:unit`.
+- `format`: Prettier and `ruff format` rewrite files in place.
 - `postinstall`: `uv sync`.
 - A new migration is made with `uv run alembic -c backend/alembic.ini revision --autogenerate -m "<change>"`, reviewed, and committed with the code that needs it. `STATUS.md` documents this.
 - Scripts use only npm, Node and uv commands, no shell-specific syntax.
@@ -284,9 +290,9 @@ Short labels ("New deal", "Log activity", "Mark done"), no exclamation marks, pl
 
 ## Testing
 
-`npm test` runs every automated check (D2). Passing tests are necessary but not enough: a change is also checked by a person in a real browser with the console open.
+`npm run check` runs every automated check, and `npm test` every test (D2). Passing tests are necessary but not enough: a change is also checked by a person in a real browser with the console open.
 
 - **Type checks:** the generated API types match the backend, and the frontend and e2e code type-check.
 - **pytest:** stage rules (probability, close date, contact to customer, timeline entry), deals created Won or Lost, delete cascades and nulling, required-field validation and limits, move/reorder positions, dashboard figures against a small fixed dataset and a given `today`, seed mix and reset (including under a running app), migrations matching the table definitions, foreign keys and check constraints, no CORS headers and the host check.
-- **Vitest:** money and date formatting, late-deal check, client-side search and sort helpers, form validation schemas, the activity form, the delete dialog's messages, and optimistic board moves.
+- **Vitest:** money and date formatting, late-deal check, client-side search and sort helpers, form validation schemas, the activity form, the delete dialog's messages, and optimistic board moves. Page tests render the real routes against a fake API (`src/test/`) and cover each page's lists, search, sort, filters, forms, server messages, deletes, empty states and load failures. Drag-and-drop is left to Playwright, since jsdom has no layout.
 - **Playwright (installed Chrome):** one spec per area (smoke, layout, organizations, contacts, deals, pipeline, activities, dashboard, persistence, security). Each test starts from freshly seeded data with a pinned date and fails on any console error or request to another host. The security spec checks that Vite gives another local origin no CORS permission.

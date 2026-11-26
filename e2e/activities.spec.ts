@@ -41,7 +41,9 @@ test('log a note, call and email from a contact, newest first', async ({ page })
   await expect(entries(page).nth(2)).toContainText('Prefers email over phone')
 })
 
-test('logging from a deal pre-fills its main contact; it shows on both timelines with its follow-up', async ({ page }) => {
+test('logging from a deal pre-fills its main contact; it shows on both timelines with its follow-up', async ({
+  page,
+}) => {
   await openDeal(page, 'Multi-site licence')
   await page.getByRole('button', { name: 'Log activity' }).click()
   const form = panel(page, 'Log activity')
@@ -95,10 +97,15 @@ test('edit and delete an activity', async ({ page }) => {
   await page.reload()
   await expect(entries(page).first()).toContainText('in Denver')
 
-  await entries(page).first().getByRole('button', { name: /^Delete activity/ }).click()
+  await entries(page)
+    .first()
+    .getByRole('button', { name: /^Delete activity/ })
+    .click()
   await expect(entries(page)).toHaveCount(0)
   await page.reload()
-  await expect(page.getByText('Nothing yet. Log a note, call or email with Log activity.')).toBeVisible()
+  await expect(
+    page.getByText('Nothing yet. Log a note, call or email with Log activity.'),
+  ).toBeVisible()
 })
 
 test('stage changes appear by themselves and have no Edit or Delete', async ({ page }) => {
@@ -113,7 +120,10 @@ test('stage changes appear by themselves and have no Edit or Delete', async ({ p
   await expect(stageEntries.first().getByRole('img', { name: 'Stage change' })).toBeVisible()
   const count = await stageEntries.count()
   expect(count).toBeGreaterThanOrEqual(2)
-  for (let i = 0; i < count; i++) await expect(stageEntries.nth(i).getByRole('button')).toHaveCount(0)
+  for (let i = 0; i < count; i++)
+    await expect(stageEntries.nth(i).getByRole('button')).toHaveCount(0)
   // Other entries do have them.
-  await expect(page.locator('li:not(.stage_change)[data-testid="timeline-entry"]').first().getByRole('button')).toHaveCount(2)
+  await expect(
+    page.locator('li:not(.stage_change)[data-testid="timeline-entry"]').first().getByRole('button'),
+  ).toHaveCount(2)
 })

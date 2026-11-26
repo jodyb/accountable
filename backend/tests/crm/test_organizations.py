@@ -2,14 +2,28 @@ from tests import factories as f
 
 
 def test_crud(client):
-    org = f.org(client, "Atlas Engineering", website="atlas-eng.com", industry="Engineering", notes="Five offices")
+    org = f.org(
+        client,
+        "Atlas Engineering",
+        website="atlas-eng.com",
+        industry="Engineering",
+        notes="Five offices",
+    )
     assert org["name"] == "Atlas Engineering" and org["website"] == "atlas-eng.com"
 
     got = f.ok(client.get(f"/api/organizations/{org['id']}"))
     assert got["industry"] == "Engineering" and got["contacts"] == [] and got["deals"] == []
 
-    edited = f.ok(client.patch(f"/api/organizations/{org['id']}", json={"name": "Atlas Engineering Ltd", "notes": None}))
-    assert edited["name"] == "Atlas Engineering Ltd" and edited["notes"] is None and edited["website"] == "atlas-eng.com"
+    edited = f.ok(
+        client.patch(
+            f"/api/organizations/{org['id']}", json={"name": "Atlas Engineering Ltd", "notes": None}
+        )
+    )
+    assert (
+        edited["name"] == "Atlas Engineering Ltd"
+        and edited["notes"] is None
+        and edited["website"] == "atlas-eng.com"
+    )
 
     rows = f.ok(client.get("/api/organizations"))
     assert [r["name"] for r in rows] == ["Atlas Engineering Ltd"]

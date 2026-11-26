@@ -4,12 +4,24 @@ from tests import factories as f
 def test_crud(client):
     org = f.org(client)
     c = f.contact(client)
-    d = f.deal(client, "ERP integration", value_cents=8_600_000, organization_id=org["id"],
-               contact_id=c["id"], close_date="2026-12-18")
+    d = f.deal(
+        client,
+        "ERP integration",
+        value_cents=8_600_000,
+        organization_id=org["id"],
+        contact_id=c["id"],
+        close_date="2026-12-18",
+    )
     assert d["organization_name"] == "Atlas Engineering" and d["contact_name"] == "Sofia Lindqvist"
 
-    edited = f.ok(client.patch(f"/api/deals/{d['id']}", json={"value_cents": 9_000_000, "close_date": None}))
-    assert edited["value_cents"] == 9_000_000 and edited["close_date"] is None and edited["name"] == "ERP integration"
+    edited = f.ok(
+        client.patch(f"/api/deals/{d['id']}", json={"value_cents": 9_000_000, "close_date": None})
+    )
+    assert (
+        edited["value_cents"] == 9_000_000
+        and edited["close_date"] is None
+        and edited["name"] == "ERP integration"
+    )
 
     assert [x["name"] for x in f.ok(client.get("/api/deals"))] == ["ERP integration"]
     f.ok(client.delete(f"/api/deals/{d['id']}"), 204)
@@ -26,7 +38,10 @@ def test_name_stage_and_value_required(client):
 def test_value_sent_and_returned_in_cents(client):
     d = f.deal(client, value_cents=4_850_050)
     assert d["value_cents"] == 4_850_050
-    assert client.post("/api/deals", json={"name": "Half cent", "value_cents": 10.5}).status_code == 422
+    assert (
+        client.post("/api/deals", json={"name": "Half cent", "value_cents": 10.5}).status_code
+        == 422
+    )
 
 
 def test_new_deal_defaults_to_new_at_10_percent(client):
@@ -81,7 +96,10 @@ def test_detail_includes_organization_and_main_contact(client):
     f.activity(client, deal_id=d["id"], occurred_on="2026-11-20")
     detail = f.ok(client.get(f"/api/deals/{d['id']}"))
     assert detail["organization"]["id"] == org["id"]
-    assert detail["contact"]["id"] == c["id"] and detail["contact"]["organization_name"] == "Atlas Engineering"
+    assert (
+        detail["contact"]["id"] == c["id"]
+        and detail["contact"]["organization_name"] == "Atlas Engineering"
+    )
     assert detail["last_activity_on"] == "2026-11-20"
 
 
@@ -97,11 +115,20 @@ def test_delete_impact_counts(client):
     d = f.deal(client)
     f.activity(client, deal_id=d["id"])
     f.activity(client, "Second", deal_id=d["id"])
-    assert f.ok(client.get(f"/api/deals/{d['id']}/delete-impact")) == {"contacts": 0, "deals": 0, "activities": 2}
+    assert f.ok(client.get(f"/api/deals/{d['id']}/delete-impact")) == {
+        "contacts": 0,
+        "deals": 0,
+        "activities": 2,
+    }
 
 
 def test_delete_closes_the_gap_in_its_column(client):
-    a, b, c = (f.deal(client, n) for n in "ABC")
+    _, b, _ = (f.deal(client, n) for n in "ABC")
     f.ok(client.delete(f"/api/deals/{b['id']}"), 204)
-    positions = [d["position"] for d in next(col for col in f.ok(client.get("/api/pipeline"))["columns"] if col["stage"] == "New")["deals"]]
+    positions = [
+        d["position"]
+        for d in next(
+            col for col in f.ok(client.get("/api/pipeline"))["columns"] if col["stage"] == "New"
+        )["deals"]
+    ]
     assert positions == [0, 1]

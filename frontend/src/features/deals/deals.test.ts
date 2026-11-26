@@ -29,7 +29,14 @@ describe('expected revenue', () => {
 describe('stages', () => {
   it('has the six stages in order with their default probabilities', () => {
     expect(STAGES).toEqual(['New', 'Qualified', 'Proposal', 'Negotiation', 'Won', 'Lost'])
-    expect(DEFAULT_PROBABILITY).toEqual({ New: 10, Qualified: 25, Proposal: 50, Negotiation: 75, Won: 100, Lost: 0 })
+    expect(DEFAULT_PROBABILITY).toEqual({
+      New: 10,
+      Qualified: 25,
+      Proposal: 50,
+      Negotiation: 75,
+      Won: 100,
+      Lost: 0,
+    })
   })
   it('uses the colors from concern 4', () => {
     expect(STAGE_COLOR.New.bg).toBe('var(--cerulean)')
@@ -42,6 +49,7 @@ describe('stages', () => {
   it('uses white text on Cerulean and Raspberry, Midnight on the rest', () => {
     expect(STAGE_COLOR.New.fg).toBe('var(--white)')
     expect(STAGE_COLOR.Lost.fg).toBe('var(--white)')
-    for (const s of ['Qualified', 'Proposal', 'Negotiation', 'Won'] as const) expect(STAGE_COLOR[s].fg).toBe('var(--midnight)')
+    for (const s of ['Qualified', 'Proposal', 'Negotiation', 'Won'] as const)
+      expect(STAGE_COLOR[s].fg).toBe('var(--midnight)')
   })
 })

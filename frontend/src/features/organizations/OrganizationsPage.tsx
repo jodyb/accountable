@@ -31,23 +31,52 @@ export function OrganizationsPage() {
           </div>
         ),
       },
-      { id: 'industry', header: 'Industry', value: (o) => o.industry, cell: (o) => o.industry ?? <span className="none">None</span> },
+      {
+        id: 'industry',
+        header: 'Industry',
+        value: (o) => o.industry,
+        cell: (o) => o.industry ?? <span className="none">None</span>,
+      },
       {
         id: 'website',
         header: 'Website',
         value: (o) => o.website,
         cell: (o) =>
           o.website ? (
-            <a className="link" href={`https://${o.website.replace(/^https?:\/\//, '')}`} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
+            <a
+              className="link"
+              href={`https://${o.website.replace(/^https?:\/\//, '')}`}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => e.stopPropagation()}
+            >
               {o.website}
             </a>
           ) : (
             <span className="none">None</span>
           ),
       },
-      { id: 'contacts', header: 'Contacts', align: 'right', value: (o) => o.contact_count, cell: (o) => <span className="num">{o.contact_count}</span> },
-      { id: 'open', header: 'Open deals', align: 'right', value: (o) => o.open_deal_count, cell: (o) => <span className="num">{o.open_deal_count}</span> },
-      { id: 'value', header: 'Open value', align: 'right', value: (o) => o.open_value_cents, cell: (o) => <span className="num">{money(o.open_value_cents)}</span> },
+      {
+        id: 'contacts',
+        header: 'Contacts',
+        align: 'right',
+        value: (o) => o.contact_count,
+        cell: (o) => <span className="num">{o.contact_count}</span>,
+      },
+      {
+        id: 'open',
+        header: 'Open deals',
+        align: 'right',
+        value: (o) => o.open_deal_count,
+        cell: (o) => <span className="num">{o.open_deal_count}</span>,
+      },
+      {
+        id: 'value',
+        header: 'Open value',
+        align: 'right',
+        value: (o) => o.open_value_cents,
+        cell: (o) => <span className="num">{money(o.open_value_cents)}</span>,
+      },
     ],
     [],
   )
@@ -70,7 +99,13 @@ export function OrganizationsPage() {
       <div className="tools">
         <label className="sbox">
           <Search size={16} aria-hidden />
-          <input type="search" placeholder="Search organizations" aria-label="Search organizations" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <input
+            type="search"
+            placeholder="Search organizations"
+            aria-label="Search organizations"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </label>
         <span className="count">
           Showing {countMatches(data, columns, search)} of {data.length}
@@ -88,11 +123,24 @@ export function OrganizationsPage() {
           onRowClick={(o) => navigate(`/organizations/${o.id}`)}
           onEdit={setEditing}
           onDelete={setDeleting}
-          empty={search ? 'No organizations match your search.' : 'No organizations yet. Add one with New organization.'}
+          empty={
+            search
+              ? 'No organizations match your search.'
+              : 'No organizations yet. Add one with New organization.'
+          }
         />
       </div>
-      <OrganizationForm open={editing !== undefined} organization={editing} onClose={() => setEditing(undefined)} />
-      <DeleteDialog kind="organization" record={deleting} onClose={() => setDeleting(null)} onConfirm={() => remove.mutateAsync(deleting!.id)} />
+      <OrganizationForm
+        open={editing !== undefined}
+        organization={editing}
+        onClose={() => setEditing(undefined)}
+      />
+      <DeleteDialog
+        kind="organization"
+        record={deleting}
+        onClose={() => setDeleting(null)}
+        onConfirm={() => remove.mutateAsync(deleting!.id)}
+      />
     </>
   )
 }

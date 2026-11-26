@@ -36,27 +36,49 @@ export function ContactsPage() {
           </div>
         ),
       },
-      { id: 'title', header: 'Job title', value: (c) => c.job_title, cell: (c) => c.job_title ?? <span className="none">None</span> },
+      {
+        id: 'title',
+        header: 'Job title',
+        value: (c) => c.job_title,
+        cell: (c) => c.job_title ?? <span className="none">None</span>,
+      },
       {
         id: 'org',
         header: 'Organization',
         value: (c) => c.organization_name,
         cell: (c) =>
           c.organization_id ? (
-            <Link className="link" to={`/organizations/${c.organization_id}`} onClick={(e) => e.stopPropagation()}>
+            <Link
+              className="link"
+              to={`/organizations/${c.organization_id}`}
+              onClick={(e) => e.stopPropagation()}
+            >
               {c.organization_name}
             </Link>
           ) : (
             <span className="none">None</span>
           ),
       },
-      { id: 'phone', header: 'Phone', value: (c) => c.phone, cell: (c) => <span className="num">{c.phone}</span> },
-      { id: 'status', header: 'Status', value: (c) => STATUS_STYLE[c.status].label, cell: (c) => <StatusBadge status={c.status} /> },
+      {
+        id: 'phone',
+        header: 'Phone',
+        value: (c) => c.phone,
+        cell: (c) => <span className="num">{c.phone}</span>,
+      },
+      {
+        id: 'status',
+        header: 'Status',
+        value: (c) => STATUS_STYLE[c.status].label,
+        cell: (c) => <StatusBadge status={c.status} />,
+      },
     ],
     [],
   )
 
-  const rows = useMemo(() => (data ?? []).filter((c) => status === 'all' || c.status === status), [data, status])
+  const rows = useMemo(
+    () => (data ?? []).filter((c) => status === 'all' || c.status === status),
+    [data, status],
+  )
 
   if (isPending) return <Loading />
   if (isError) return <LoadError what="contacts" />
@@ -76,14 +98,29 @@ export function ContactsPage() {
       <div className="tools">
         <label className="sbox">
           <Search size={16} aria-hidden />
-          <input type="search" placeholder="Search contacts" aria-label="Search contacts" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <input
+            type="search"
+            placeholder="Search contacts"
+            aria-label="Search contacts"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </label>
         <div className="seg" role="group" aria-label="Filter by status">
-          <button className={status === 'all' ? 'on' : ''} aria-pressed={status === 'all'} onClick={() => setStatus('all')}>
+          <button
+            className={status === 'all' ? 'on' : ''}
+            aria-pressed={status === 'all'}
+            onClick={() => setStatus('all')}
+          >
             All<span className="c">{data.length}</span>
           </button>
           {STATUSES.map((s) => (
-            <button key={s} className={status === s ? 'on' : ''} aria-pressed={status === s} onClick={() => setStatus(s)}>
+            <button
+              key={s}
+              className={status === s ? 'on' : ''}
+              aria-pressed={status === s}
+              onClick={() => setStatus(s)}
+            >
               {STATUS_STYLE[s].label}
               <span className="c">{count(s)}</span>
             </button>
@@ -105,11 +142,24 @@ export function ContactsPage() {
           onRowClick={(c) => navigate(`/contacts/${c.id}`)}
           onEdit={setEditing}
           onDelete={setDeleting}
-          empty={search || status !== 'all' ? 'No contacts match.' : 'No contacts yet. Add one with New contact.'}
+          empty={
+            search || status !== 'all'
+              ? 'No contacts match.'
+              : 'No contacts yet. Add one with New contact.'
+          }
         />
       </div>
-      <ContactForm open={editing !== undefined} contact={editing} onClose={() => setEditing(undefined)} />
-      <DeleteDialog kind="contact" record={deleting} onClose={() => setDeleting(null)} onConfirm={() => remove.mutateAsync(deleting!.id)} />
+      <ContactForm
+        open={editing !== undefined}
+        contact={editing}
+        onClose={() => setEditing(undefined)}
+      />
+      <DeleteDialog
+        kind="contact"
+        record={deleting}
+        onClose={() => setDeleting(null)}
+        onConfirm={() => remove.mutateAsync(deleting!.id)}
+      />
     </>
   )
 }

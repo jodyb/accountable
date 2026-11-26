@@ -32,9 +32,24 @@ function Kpis({ d }: { d: Dashboard }) {
   const k = d.kpis
   const monthName = parseDate(d.today).toLocaleDateString('en-US', { month: 'long' })
   const tiles = [
-    { label: 'Open pipeline', value: money(k.open_value_cents), sub: plural(k.open_count, 'open deal'), color: 'var(--cerulean)' },
-    { label: 'Expected revenue', value: money(k.open_expected_cents), sub: 'Value x probability', color: 'var(--marigold)' },
-    { label: 'Won this month', value: money(k.won_this_month_cents), sub: `${plural(k.won_this_month_count, 'deal')} in ${monthName}`, color: 'var(--seagreen)' },
+    {
+      label: 'Open pipeline',
+      value: money(k.open_value_cents),
+      sub: plural(k.open_count, 'open deal'),
+      color: 'var(--cerulean)',
+    },
+    {
+      label: 'Expected revenue',
+      value: money(k.open_expected_cents),
+      sub: 'Value x probability',
+      color: 'var(--marigold)',
+    },
+    {
+      label: 'Won this month',
+      value: money(k.won_this_month_cents),
+      sub: `${plural(k.won_this_month_count, 'deal')} in ${monthName}`,
+      color: 'var(--seagreen)',
+    },
     {
       label: 'Win rate',
       value: k.win_rate === null ? 'None yet' : `${k.win_rate}%`,
@@ -149,7 +164,9 @@ export function DashboardPage() {
             {overdue > 0 && <span className="pill rasp">{overdue} overdue</span>}
           </div>
           {data.follow_ups.length === 0 ? (
-            <p className="empty">No follow-ups due. Add one by logging an activity with a follow-up date.</p>
+            <p className="empty">
+              No follow-ups due. Add one by logging an activity with a follow-up date.
+            </p>
           ) : (
             <ul className="tasks" aria-label="Follow-ups">
               {data.follow_ups.map((f) => (

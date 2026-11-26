@@ -7,7 +7,14 @@ const TODAY = '2026-11-24'
 let nextId = 1
 
 function deal(name: string, stage: Stage, value_cents: number, probability?: number): Deal {
-  const defaults: Record<Stage, number> = { New: 10, Qualified: 25, Proposal: 50, Negotiation: 75, Won: 100, Lost: 0 }
+  const defaults: Record<Stage, number> = {
+    New: 10,
+    Qualified: 25,
+    Proposal: 50,
+    Negotiation: 75,
+    Won: 100,
+    Lost: 0,
+  }
   return {
     id: nextId++,
     name,
@@ -32,7 +39,9 @@ function board(): Board {
     deal('C', 'Proposal', 400_000, 40),
     deal('D', 'Won', 1_000_000),
   ]
-  return withTotals(STAGES.map((stage) => ({ stage, deals: cards.filter((d) => d.stage === stage) })))
+  return withTotals(
+    STAGES.map((stage) => ({ stage, deals: cards.filter((d) => d.stage === stage) })),
+  )
 }
 
 const col = (b: Board, stage: Stage) => b.columns.find((c) => c.stage === stage)!
@@ -42,7 +51,11 @@ describe('withTotals', () => {
   it('counts each column and the open board', () => {
     const b = board()
     expect(col(b, 'New')).toMatchObject({ count: 2, value_cents: 300_000, expected_cents: 30_000 })
-    expect(col(b, 'Proposal')).toMatchObject({ count: 1, value_cents: 400_000, expected_cents: 160_000 })
+    expect(col(b, 'Proposal')).toMatchObject({
+      count: 1,
+      value_cents: 400_000,
+      expected_cents: 160_000,
+    })
     expect(b.open_value_cents).toBe(700_000)
     expect(b.open_expected_cents).toBe(190_000)
   })
@@ -55,9 +68,20 @@ describe('optimistic move', () => {
     const after = moveCard(before, a.id, 'Negotiation', 0, TODAY)
     expect(names(after, 'New')).toEqual(['B'])
     expect(names(after, 'Negotiation')).toEqual(['A'])
-    expect(col(after, 'Negotiation').deals[0]).toMatchObject({ stage: 'Negotiation', probability: 75 })
-    expect(col(after, 'New')).toMatchObject({ count: 1, value_cents: 200_000, expected_cents: 20_000 })
-    expect(col(after, 'Negotiation')).toMatchObject({ count: 1, value_cents: 100_000, expected_cents: 75_000 })
+    expect(col(after, 'Negotiation').deals[0]).toMatchObject({
+      stage: 'Negotiation',
+      probability: 75,
+    })
+    expect(col(after, 'New')).toMatchObject({
+      count: 1,
+      value_cents: 200_000,
+      expected_cents: 20_000,
+    })
+    expect(col(after, 'Negotiation')).toMatchObject({
+      count: 1,
+      value_cents: 100_000,
+      expected_cents: 75_000,
+    })
     expect(after.open_value_cents).toBe(700_000)
     expect(after.open_expected_cents).toBe(20_000 + 160_000 + 75_000)
   })
@@ -66,13 +90,22 @@ describe('optimistic move', () => {
     const before = board()
     const c = col(before, 'Proposal').deals[0]
     const after = moveCard(before, c.id, 'Won', 0, TODAY)
-    expect(col(after, 'Won').deals[0]).toMatchObject({ name: 'C', probability: 100, close_date: TODAY })
+    expect(col(after, 'Won').deals[0]).toMatchObject({
+      name: 'C',
+      probability: 100,
+      close_date: TODAY,
+    })
     expect(after.open_value_cents).toBe(300_000)
     expect(after.open_expected_cents).toBe(30_000)
   })
 
   it('reordering within a column keeps the probability, including a hand-set one', () => {
-    const before = withTotals(STAGES.map((stage) => ({ stage, deals: stage === 'Proposal' ? [deal('X', 'Proposal', 1, 40), deal('Y', 'Proposal', 1)] : [] })))
+    const before = withTotals(
+      STAGES.map((stage) => ({
+        stage,
+        deals: stage === 'Proposal' ? [deal('X', 'Proposal', 1, 40), deal('Y', 'Proposal', 1)] : [],
+      })),
+    )
     const x = col(before, 'Proposal').deals[0]
     const after = moveCard(before, x.id, 'Proposal', 1, TODAY)
     expect(names(after, 'Proposal')).toEqual(['Y', 'X'])

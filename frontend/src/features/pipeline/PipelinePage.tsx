@@ -52,15 +52,22 @@ export function PipelinePage() {
   const ids = (stage: Stage) => board.columns.find((c) => c.stage === stage)!.deals.map((d) => d.id)
 
   /** Where the card would land if dropped now. Cards stay put while dragging, so this never moves the layout under the pointer. */
-  const targetOf = ({ active, over }: DragOverEvent | DragMoveEvent | DragEndEvent): Target | null => {
+  const targetOf = ({
+    active,
+    over,
+  }: DragOverEvent | DragMoveEvent | DragEndEvent): Target | null => {
     if (!over) return null
     const from = findDeal(board, Number(active.id))!.stage
     const stage = over.data.current?.stage as Stage | undefined
     if (!stage) return null
     const overCard = typeof over.id === 'number' ? over.id : null
     const pointer = active.rect.current.translated
-    const lowerHalf = !!pointer && pointer.top + pointer.height / 2 > over.rect.top + over.rect.height / 2
-    return { stage, index: dropIndex(ids(stage), Number(active.id), stage === from, overCard, lowerHalf) }
+    const lowerHalf =
+      !!pointer && pointer.top + pointer.height / 2 > over.rect.top + over.rect.height / 2
+    return {
+      stage,
+      index: dropIndex(ids(stage), Number(active.id), stage === from, overCard, lowerHalf),
+    }
   }
 
   const track = (event: DragOverEvent | DragMoveEvent) => {
@@ -84,7 +91,8 @@ export function PipelinePage() {
           const message = original.stage !== to.stage && stageMessage(to.stage, day)
           if (message) notify(message)
         },
-        onError: () => notify(`Couldn't move ${original.name}. It has been put back.`, { bad: true }),
+        onError: () =>
+          notify(`Couldn't move ${original.name}. It has been put back.`, { bad: true }),
       },
     )
   }
@@ -92,10 +100,13 @@ export function PipelinePage() {
   const active = activeId !== null ? findDeal(board, activeId) : undefined
   const visible = (stage: Stage) => {
     const deals = board.columns.find((c) => c.stage === stage)!.deals
-    return searching ? deals.filter((d) => matchesSearch([d.name, d.organization_name, d.contact_name], search)) : deals
+    return searching
+      ? deals.filter((d) => matchesSearch([d.name, d.organization_name, d.contact_name], search))
+      : deals
   }
   // A drop line marks the spot in another column; in its own column the gap opens by itself.
-  const dropLineAt = (stage: Stage) => (target && active && target.stage === stage && active.stage !== stage ? target.index : null)
+  const dropLineAt = (stage: Stage) =>
+    target && active && target.stage === stage && active.stage !== stage ? target.index : null
 
   return (
     <>
@@ -122,13 +133,27 @@ export function PipelinePage() {
       <div className="toolbar">
         <label className="sbox" style={{ width: 280 }}>
           <Search size={16} aria-hidden />
-          <input type="search" placeholder="Search deals" aria-label="Search deals" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <input
+            type="search"
+            placeholder="Search deals"
+            aria-label="Search deals"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </label>
         <button className="btn" onClick={() => setAdding('New')}>
           <Plus size={16} /> New deal
         </button>
       </div>
-      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={({ active }) => setActiveId(Number(active.id))} onDragOver={track} onDragMove={track} onDragEnd={onDragEnd} onDragCancel={() => (setActiveId(null), setTarget(null))}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragStart={({ active }) => setActiveId(Number(active.id))}
+        onDragOver={track}
+        onDragMove={track}
+        onDragEnd={onDragEnd}
+        onDragCancel={() => (setActiveId(null), setTarget(null))}
+      >
         <div className="board">
           {STAGES.map((stage) => (
             <BoardColumn
@@ -144,7 +169,9 @@ export function PipelinePage() {
             />
           ))}
         </div>
-        <DragOverlay dropAnimation={null}>{active ? <DealCard deal={active} today={day} lifted /> : null}</DragOverlay>
+        <DragOverlay dropAnimation={null}>
+          {active ? <DealCard deal={active} today={day} lifted /> : null}
+        </DragOverlay>
       </DndContext>
       <DealForm
         open={adding !== null}

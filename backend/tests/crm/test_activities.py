@@ -8,12 +8,17 @@ def test_required_fields(client):
     response = client.post("/api/activities", json={"contact_id": c["id"]})
     assert response.status_code == 422
     assert {"type", "description", "occurred_on"} <= set(response.json()["errors"])
-    blank = client.post("/api/activities", json={"type": "note", "description": "  ", "occurred_on": f.TODAY, "contact_id": c["id"]})
+    blank = client.post(
+        "/api/activities",
+        json={"type": "note", "description": "  ", "occurred_on": f.TODAY, "contact_id": c["id"]},
+    )
     assert blank.json()["errors"] == {"description": "Enter a description."}
 
 
 def test_contact_or_deal_required(client):
-    response = client.post("/api/activities", json={"type": "note", "description": "x", "occurred_on": f.TODAY})
+    response = client.post(
+        "/api/activities", json={"type": "note", "description": "x", "occurred_on": f.TODAY}
+    )
     assert response.status_code == 422
     assert response.json()["errors"] == {"contact_id": "Choose a contact or a deal."}
 
@@ -31,7 +36,15 @@ def test_each_user_type_can_be_created(client, kind):
 
 def test_stage_change_cannot_be_created(client):
     d = f.deal(client)
-    response = client.post("/api/activities", json={"type": "stage_change", "description": "Moved", "occurred_on": f.TODAY, "deal_id": d["id"]})
+    response = client.post(
+        "/api/activities",
+        json={
+            "type": "stage_change",
+            "description": "Moved",
+            "occurred_on": f.TODAY,
+            "deal_id": d["id"],
+        },
+    )
     assert response.status_code == 422
 
 
@@ -40,12 +53,22 @@ def test_stage_change_cannot_be_edited_or_deleted_and_has_no_follow_up(client):
     f.move(client, d["id"], "Qualified")
     entry = f.ok(client.get(f"/api/deals/{d['id']}/timeline"))[0]
     assert entry["type"] == "stage_change" and entry["follow_up_on"] is None
-    assert client.patch(f"/api/activities/{entry['id']}", json={"follow_up_on": "2026-12-01"}).status_code == 422
-    assert client.patch(f"/api/activities/{entry['id']}", json={"description": "Edited"}).status_code == 422
+    assert (
+        client.patch(
+            f"/api/activities/{entry['id']}", json={"follow_up_on": "2026-12-01"}
+        ).status_code
+        == 422
+    )
+    assert (
+        client.patch(f"/api/activities/{entry['id']}", json={"description": "Edited"}).status_code
+        == 422
+    )
     assert client.delete(f"/api/activities/{entry['id']}").status_code == 422
     # A user activity can't be turned into one either.
     a = f.activity(client, deal_id=d["id"])
-    assert client.patch(f"/api/activities/{a['id']}", json={"type": "stage_change"}).status_code == 422
+    assert (
+        client.patch(f"/api/activities/{a['id']}", json={"type": "stage_change"}).status_code == 422
+    )
 
 
 def test_stage_changes_go_when_the_deal_is_deleted(client):
@@ -79,7 +102,11 @@ def test_contact_timeline_includes_activities_on_their_deals(client):
 def test_follow_up_date_and_done_can_be_set_and_changed(client):
     a = f.activity(client, contact_id=f.contact(client)["id"], follow_up_on="2026-12-01")
     assert (a["follow_up_on"], a["done"]) == ("2026-12-01", False)
-    a = f.ok(client.patch(f"/api/activities/{a['id']}", json={"follow_up_on": "2026-12-05", "done": True}))
+    a = f.ok(
+        client.patch(
+            f"/api/activities/{a['id']}", json={"follow_up_on": "2026-12-05", "done": True}
+        )
+    )
     assert (a["follow_up_on"], a["done"]) == ("2026-12-05", True)
     a = f.ok(client.patch(f"/api/activities/{a['id']}", json={"done": False, "follow_up_on": None}))
     assert (a["follow_up_on"], a["done"]) == (None, False)
@@ -88,7 +115,9 @@ def test_follow_up_date_and_done_can_be_set_and_changed(client):
 def test_edit_and_delete(client):
     c = f.contact(client)
     a = f.activity(client, "Typo", contact_id=c["id"])
-    a = f.ok(client.patch(f"/api/activities/{a['id']}", json={"description": "Fixed", "type": "email"}))
+    a = f.ok(
+        client.patch(f"/api/activities/{a['id']}", json={"description": "Fixed", "type": "email"})
+    )
     assert (a["description"], a["type"], a["contact_name"]) == ("Fixed", "email", "Sofia Lindqvist")
     f.ok(client.delete(f"/api/activities/{a['id']}"), 204)
     assert f.ok(client.get(f"/api/contacts/{c['id']}/timeline")) == []

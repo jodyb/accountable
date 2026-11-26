@@ -1,5 +1,14 @@
 // A record's activities, newest first. Stage changes have no Edit or Delete.
-import { ArrowRight, Check, FileText, Mail, Pencil, Phone, Trash2, type LucideIcon } from 'lucide-react'
+import {
+  ArrowRight,
+  Check,
+  FileText,
+  Mail,
+  Pencil,
+  Phone,
+  Trash2,
+  type LucideIcon,
+} from 'lucide-react'
 import { Link } from 'react-router'
 import type { Activity, ActivityType } from '../../lib/api'
 import { today } from '../../lib/dates'
@@ -32,7 +41,8 @@ export function FollowUpChip({ activity }: { activity: Activity }) {
         <Check size={12} /> Follow-up done
       </span>
     )
-  if (activity.follow_up_on < today()) return <span className="chip over">Follow-up overdue, {shortDate(activity.follow_up_on)}</span>
+  if (activity.follow_up_on < today())
+    return <span className="chip over">Follow-up overdue, {shortDate(activity.follow_up_on)}</span>
   return <span className="chip up">Follow-up {shortDate(activity.follow_up_on)}</span>
 }
 
@@ -58,7 +68,8 @@ export function Timeline({ activities, show, onEdit }: Props) {
   const remove = useDeleteActivity()
   const notify = useToast()
 
-  if (activities.length === 0) return <p className="empty">Nothing yet. Log a note, call or email with Log activity.</p>
+  if (activities.length === 0)
+    return <p className="empty">Nothing yet. Log a note, call or email with Log activity.</p>
 
   return (
     <ul className="tline" aria-label="Timeline">
@@ -77,7 +88,13 @@ export function Timeline({ activities, show, onEdit }: Props) {
           <li key={a.id} className={a.type} data-testid="timeline-entry">
             <ActivityIcon type={a.type} />
             <div>
-              <div className="tx">{a.type === 'stage_change' ? <StageChangeText text={a.description} /> : a.description}</div>
+              <div className="tx">
+                {a.type === 'stage_change' ? (
+                  <StageChangeText text={a.description} />
+                ) : (
+                  a.description
+                )}
+              </div>
               <div className="tm">
                 {TYPE_LABEL[a.type]} · <span className="num">{displayDate(a.occurred_on)}</span>
                 {link && <> · {link}</>}
@@ -88,7 +105,12 @@ export function Timeline({ activities, show, onEdit }: Props) {
               <span />
             ) : (
               <div className="acts">
-                <button type="button" title="Edit" aria-label={`Edit activity: ${a.description}`} onClick={() => onEdit(a)}>
+                <button
+                  type="button"
+                  title="Edit"
+                  aria-label={`Edit activity: ${a.description}`}
+                  onClick={() => onEdit(a)}
+                >
                   <Pencil size={15} />
                 </button>
                 <button
@@ -99,7 +121,8 @@ export function Timeline({ activities, show, onEdit }: Props) {
                   onClick={() =>
                     remove.mutate(a.id, {
                       onSuccess: () => notify('Activity deleted.'),
-                      onError: () => notify("Couldn't delete the activity. Try again.", { bad: true }),
+                      onError: () =>
+                        notify("Couldn't delete the activity. Try again.", { bad: true }),
                     })
                   }
                 >

@@ -7,4 +7,5 @@ export const useSaveActivity = () =>
       id ? api.patch<Activity>(`/activities/${id}`, body) : api.post<Activity>('/activities', body),
   })
 
-export const useDeleteActivity = () => useMutation({ mutationFn: (id: number) => api.delete(`/activities/${id}`) })
+export const useDeleteActivity = () =>
+  useMutation({ mutationFn: (id: number) => api.delete(`/activities/${id}`) })

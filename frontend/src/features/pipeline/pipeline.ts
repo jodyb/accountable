@@ -16,7 +16,12 @@ function totals(stage: Stage, deals: Deal[]): Column {
 
 /** Rebuild counts, column totals and board totals from the cards. */
 export function withTotals(columns: { stage: Stage; deals: Deal[] }[]): Board {
-  const cols = columns.map((c) => totals(c.stage, c.deals.map((d, position) => ({ ...d, position }))))
+  const cols = columns.map((c) =>
+    totals(
+      c.stage,
+      c.deals.map((d, position) => ({ ...d, position })),
+    ),
+  )
   const open = cols.filter((c) => isOpen(c.stage))
   return {
     columns: cols,
@@ -34,7 +39,13 @@ export function findDeal(board: Board, dealId: number): Deal | undefined {
 }
 
 /** Move a card to `index` in the `stage` column, applying the stage's probability if it changed. */
-export function moveCard(board: Board, dealId: number, stage: Stage, index: number, today: string): Board {
+export function moveCard(
+  board: Board,
+  dealId: number,
+  stage: Stage,
+  index: number,
+  today: string,
+): Board {
   const deal = findDeal(board, dealId)
   if (!deal) return board
   let moved = deal
@@ -58,7 +69,13 @@ export function moveCard(board: Board, dealId: number, stage: Stage, index: numb
  * In its own column the card takes the place of the card it is over; in another
  * column it goes before that card, or after it when the pointer is in its lower half.
  */
-export function dropIndex(target: number[], activeId: number, sameColumn: boolean, overId: number | null, lowerHalf: boolean): number {
+export function dropIndex(
+  target: number[],
+  activeId: number,
+  sameColumn: boolean,
+  overId: number | null,
+  lowerHalf: boolean,
+): number {
   const others = target.filter((id) => id !== activeId)
   if (overId === null || overId === activeId) {
     return overId === activeId ? target.indexOf(activeId) : others.length

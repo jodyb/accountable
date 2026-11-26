@@ -148,7 +148,10 @@ class DealIn(Input):
     value_cents: ValueCents
     probability: Probability | None = None
     close_date: date | None = None
-    today: date | None = Field(default=None, description="The browser's local date, the close date for a deal created Won or Lost")
+    today: date | None = Field(
+        default=None,
+        description="The browser's local date, the close date for a deal created Won or Lost",
+    )
 
 
 class DealPatch(Patch):
@@ -160,7 +163,9 @@ class DealPatch(Patch):
     value_cents: ValueCents | None = None
     probability: Probability | None = None
     close_date: date | None = None
-    today: date | None = Field(default=None, description="The browser's local date, used if the stage changes")
+    today: date | None = Field(
+        default=None, description="The browser's local date, used if the stage changes"
+    )
 
 
 class Deal(Output):
@@ -274,7 +279,9 @@ class Kpis(BaseModel):
     open_count: int
     won_this_month_cents: int
     won_this_month_count: int
-    win_rate: int | None = Field(description="Percent, won / (won + lost) over 12 months; null with no closed deals")
+    win_rate: int | None = Field(
+        description="Percent, won / (won + lost) over 12 months; null with no closed deals"
+    )
     won_12m_count: int
     lost_12m_count: int
     late_count: int

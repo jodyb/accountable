@@ -6,7 +6,10 @@ describe('StageChangeText', () => {
   it('bolds the two stage names', () => {
     const { container } = render(<StageChangeText text="Moved from Proposal to Negotiation" />)
     expect(container.textContent).toBe('Moved from Proposal to Negotiation')
-    expect([...container.querySelectorAll('b')].map((b) => b.textContent)).toEqual(['Proposal', 'Negotiation'])
+    expect([...container.querySelectorAll('b')].map((b) => b.textContent)).toEqual([
+      'Proposal',
+      'Negotiation',
+    ])
   })
 
   it('shows other text as it is', () => {

@@ -23,7 +23,14 @@ def positions(board_json, stage):
 
 def test_response_is_the_updated_board(client, board):
     response = f.move(client, board["A"], "New", 2)
-    assert {c["stage"] for c in response["columns"]} == {"New", "Qualified", "Proposal", "Negotiation", "Won", "Lost"}
+    assert {c["stage"] for c in response["columns"]} == {
+        "New",
+        "Qualified",
+        "Proposal",
+        "Negotiation",
+        "Won",
+        "Lost",
+    }
     assert response == f.ok(client.get("/api/pipeline"))
 
 
@@ -69,11 +76,15 @@ def test_order_survives_a_fresh_read(client, board):
 
 def test_unknown_stage_is_rejected_and_changes_nothing(client, board):
     before = f.ok(client.get("/api/pipeline"))
-    response = client.post(f"/api/deals/{board['A']}/move", json={"stage": "Pending", "index": 0, "today": f.TODAY})
+    response = client.post(
+        f"/api/deals/{board['A']}/move", json={"stage": "Pending", "index": 0, "today": f.TODAY}
+    )
     assert response.status_code == 422
     assert f.ok(client.get("/api/pipeline")) == before
 
 
 def test_negative_index_is_rejected(client, board):
-    response = client.post(f"/api/deals/{board['A']}/move", json={"stage": "New", "index": -1, "today": f.TODAY})
+    response = client.post(
+        f"/api/deals/{board['A']}/move", json={"stage": "New", "index": -1, "today": f.TODAY}
+    )
     assert response.status_code == 422

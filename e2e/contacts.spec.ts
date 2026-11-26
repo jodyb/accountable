@@ -28,7 +28,9 @@ test('add, edit and delete a contact; changes survive reload', async ({ page }) 
 
   await page.getByRole('button', { name: 'Delete Nora Quinn' }).click()
   const dialog = page.getByRole('alertdialog')
-  await expect(dialog).toContainText("Its 0 activities will be deleted. Its 0 deals will be kept, with no main contact. This can't be undone.")
+  await expect(dialog).toContainText(
+    "Its 0 activities will be deleted. Its 0 deals will be kept, with no main contact. This can't be undone.",
+  )
   await dialog.getByRole('button', { name: 'Delete contact' }).click()
   await page.reload()
   await expect(rows(page)).toHaveCount(40)
@@ -57,7 +59,8 @@ test('filter by each status', async ({ page }) => {
     await button.click()
     await expect(button).toHaveAttribute('aria-pressed', 'true')
     await expect(rows(page)).toHaveCount(expected)
-    for (const badge of await rows(page).locator('td:nth-child(5)').allTextContents()) expect(badge).toBe(status)
+    for (const badge of await rows(page).locator('td:nth-child(5)').allTextContents())
+      expect(badge).toBe(status)
   }
   await filter.getByRole('button', { name: /^All/ }).click()
   await expect(rows(page)).toHaveCount(40)
@@ -77,13 +80,17 @@ test('the contact page shows details, organization, deals and timeline', async (
   await expect(page.getByRole('heading', { level: 1, name: 'Northwind Logistics' })).toBeVisible()
 })
 
-test('deleting a contact deletes its activities and keeps its deals with no main contact', async ({ page }) => {
+test('deleting a contact deletes its activities and keeps its deals with no main contact', async ({
+  page,
+}) => {
   await page.goto('/contacts')
   await row(page, 'Maya Okafor').locator('td').first().click()
   await expect(page.getByTestId('timeline-entry').first()).toBeVisible()
   await page.getByRole('button', { name: 'Delete', exact: true }).click()
   const dialog = page.getByRole('alertdialog')
-  await expect(dialog).toContainText(/Its \d+ activit(y|ies) will be deleted\. Its 2 deals will be kept, with no main contact\./)
+  await expect(dialog).toContainText(
+    /Its \d+ activit(y|ies) will be deleted\. Its 2 deals will be kept, with no main contact\./,
+  )
   await dialog.getByRole('button', { name: 'Delete contact' }).click()
   await expect(page).toHaveURL(/\/contacts$/)
   await expect(row(page, 'Maya Okafor')).toHaveCount(0)
@@ -92,6 +99,8 @@ test('deleting a contact deletes its activities and keeps its deals with no main
   await expect(row(page, 'Route optimisation').locator('td').nth(2)).toHaveText('None')
   await row(page, 'Route optimisation').locator('td').first().click()
   await expect(page.getByRole('heading', { level: 1, name: 'Route optimisation' })).toBeVisible()
-  await expect(page.getByText('Main contact').locator('xpath=following-sibling::dd[1]')).toHaveText('None')
+  await expect(page.getByText('Main contact').locator('xpath=following-sibling::dd[1]')).toHaveText(
+    'None',
+  )
   await expect(page.getByTestId('timeline-entry')).toHaveCount(0) // every entry was linked to Maya
 })

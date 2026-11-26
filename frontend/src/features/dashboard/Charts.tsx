@@ -1,6 +1,18 @@
 // Revenue won (line), deals won (bars) and the sales funnel, styled to mockup A.
 import { format } from 'date-fns'
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  LabelList,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
 import type { Dashboard } from '../../lib/api'
 import { parseDate } from '../../lib/dates'
 import { money, moneyCompact, plural } from '../../lib/format'
@@ -11,13 +23,26 @@ type Point = { label: string; month: string; revenue: number; won: number }
 function points(months: Dashboard['months']): Point[] {
   return months.map((m) => {
     const d = parseDate(`${m.month}-01`)
-    return { label: format(d, 'MMM'), month: format(d, 'MMMM yyyy'), revenue: m.revenue_cents, won: m.won_count }
+    return {
+      label: format(d, 'MMM'),
+      month: format(d, 'MMMM yyyy'),
+      revenue: m.revenue_cents,
+      won: m.won_count,
+    }
   })
 }
 
 const axis = { stroke: 'var(--muted)', tickLine: false, axisLine: false }
 
-function ChartTip({ active, payload, kind }: { active?: boolean; payload?: readonly { payload: Point }[]; kind: 'revenue' | 'won' }) {
+function ChartTip({
+  active,
+  payload,
+  kind,
+}: {
+  active?: boolean
+  payload?: readonly { payload: Point }[]
+  kind: 'revenue' | 'won'
+}) {
   if (!active || !payload?.length) return null
   const p = payload[0].payload
   return (
@@ -44,7 +69,10 @@ export function RevenueChart({ months }: { months: Dashboard['months'] }) {
           <CartesianGrid vertical={false} stroke="var(--grid)" />
           <XAxis dataKey="label" {...axis} interval={0} />
           <YAxis {...axis} width={84} tickFormatter={(v: number) => moneyCompact(v)} />
-          <Tooltip content={(props) => <ChartTip {...(props as object)} kind="revenue" />} cursor={{ stroke: 'var(--seamist)' }} />
+          <Tooltip
+            content={(props) => <ChartTip {...(props as object)} kind="revenue" />}
+            cursor={{ stroke: 'var(--seamist)' }}
+          />
           <Area
             type="monotone"
             dataKey="revenue"
@@ -70,10 +98,17 @@ export function DealsWonChart({ months }: { months: Dashboard['months'] }) {
           <CartesianGrid vertical={false} stroke="var(--grid)" />
           <XAxis dataKey="label" {...axis} interval={0} />
           <YAxis {...axis} allowDecimals={false} />
-          <Tooltip content={(props) => <ChartTip {...(props as object)} kind="won" />} cursor={{ fill: 'var(--soft)' }} />
+          <Tooltip
+            content={(props) => <ChartTip {...(props as object)} kind="won" />}
+            cursor={{ fill: 'var(--soft)' }}
+          />
           <Bar dataKey="won" radius={[4, 4, 0, 0]} isAnimationActive={false} maxBarSize={22}>
             {data.map((p, i) => (
-              <Cell key={p.month} fill="var(--cerulean)" fillOpacity={i === data.length - 1 ? 0.45 : 1} />
+              <Cell
+                key={p.month}
+                fill="var(--cerulean)"
+                fillOpacity={i === data.length - 1 ? 0.45 : 1}
+              />
             ))}
             <LabelList dataKey="won" position="top" />
           </Bar>
@@ -95,7 +130,13 @@ export function Funnel({ funnel }: { funnel: Dashboard['funnel'] }) {
             <span>{plural(s.count, 'deal')}</span>
           </div>
           <div className="fb-track">
-            <div className="fb-bar" style={{ width: `${(100 * s.value_cents) / max}%`, background: STAGE_COLOR[s.stage].bg }} />
+            <div
+              className="fb-bar"
+              style={{
+                width: `${(100 * s.value_cents) / max}%`,
+                background: STAGE_COLOR[s.stage].bg,
+              }}
+            />
           </div>
           <div className="fb-val num">{money(s.value_cents)}</div>
           <div className="tip" role="tooltip">

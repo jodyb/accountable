@@ -5,7 +5,14 @@ def test_six_columns_in_stage_order_with_cards_in_position_order(client):
     f.deal(client, "Second")
     f.deal(client, "First")
     board = f.ok(client.get("/api/pipeline"))
-    assert [c["stage"] for c in board["columns"]] == ["New", "Qualified", "Proposal", "Negotiation", "Won", "Lost"]
+    assert [c["stage"] for c in board["columns"]] == [
+        "New",
+        "Qualified",
+        "Proposal",
+        "Negotiation",
+        "Won",
+        "Lost",
+    ]
     assert f.column(board, "New") == ["First", "Second"]
 
 
@@ -20,7 +27,14 @@ def test_column_count_total_and_expected_revenue(client):
 
 
 def test_board_totals_cover_open_stages_only(client):
-    for stage, value in [("New", 100), ("Qualified", 200), ("Proposal", 300), ("Negotiation", 400), ("Won", 5000), ("Lost", 7000)]:
+    for stage, value in [
+        ("New", 100),
+        ("Qualified", 200),
+        ("Proposal", 300),
+        ("Negotiation", 400),
+        ("Won", 5000),
+        ("Lost", 7000),
+    ]:
         f.deal(client, stage, stage=stage, value_cents=value)
     board = f.ok(client.get("/api/pipeline"))
     assert board["open_value_cents"] == 1000

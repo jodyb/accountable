@@ -3,13 +3,17 @@ import { format } from 'date-fns'
 import { parseDate } from './dates'
 
 const whole = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 })
-const withCents = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+const withCents = new Intl.NumberFormat('en-US', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
 
 /** `$48,500 USD`; cents appear only when there are some. */
 export function money(cents: number): string {
   const rounded = Math.round(cents)
   const dollars = rounded / 100
-  const text = rounded % 100 === 0 ? whole.format(Math.abs(dollars)) : withCents.format(Math.abs(dollars))
+  const text =
+    rounded % 100 === 0 ? whole.format(Math.abs(dollars)) : withCents.format(Math.abs(dollars))
   return `${dollars < 0 ? '-' : ''}$${text} USD`
 }
 
@@ -79,4 +83,9 @@ export function dollarsToCents(text: string): number | null {
 
 export function centsToDollars(cents: number): string {
   return cents % 100 === 0 ? String(cents / 100) : (cents / 100).toFixed(2)
+}
+
+/** A select's value for an optional record id, where '' means none. */
+export function idValue(id?: number | null): string {
+  return id ? String(id) : ''
 }

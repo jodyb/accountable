@@ -12,7 +12,9 @@ CLIENT_TODAY = "2026-11-24"  # deliberately not the server's date
 
 
 def patch_stage(client, deal_id, stage, today=CLIENT_TODAY, **extra):
-    return f.ok(client.patch(f"/api/deals/{deal_id}", json={"stage": stage, "today": today, **extra}))
+    return f.ok(
+        client.patch(f"/api/deals/{deal_id}", json={"stage": stage, "today": today, **extra})
+    )
 
 
 def move_stage(client, deal_id, stage, today=CLIENT_TODAY):
@@ -46,9 +48,13 @@ def test_changing_stage_sets_the_default_probability(client, how, stage):
 @pytest.mark.parametrize("how", CHANGERS)
 def test_hand_set_probability_kept_until_stage_changes(client, how):
     d = f.deal(client, stage="Proposal")
-    edited = f.ok(client.patch(f"/api/deals/{d['id']}", json={"probability": 65, "name": "Renamed"}))
+    edited = f.ok(
+        client.patch(f"/api/deals/{d['id']}", json={"probability": 65, "name": "Renamed"})
+    )
     assert edited["probability"] == 65
-    edited = f.ok(client.patch(f"/api/deals/{d['id']}", json={"stage": "Proposal", "probability": 65}))
+    edited = f.ok(
+        client.patch(f"/api/deals/{d['id']}", json={"stage": "Proposal", "probability": 65})
+    )
     assert edited["probability"] == 65
     assert CHANGERS[how](client, d["id"], "Negotiation")["probability"] == 75
 

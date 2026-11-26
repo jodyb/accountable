@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { Loading } from '../../app/Layout'
 import { ApiError, type Activity } from '../../lib/api'
 import { today } from '../../lib/dates'
@@ -10,9 +10,15 @@ import { useToast } from '../../ui/Toast'
 import { useContacts } from '../contacts/queries'
 import { useDeals } from '../deals/queries'
 import { useSaveActivity } from './queries'
-import { activitySchema, toActivityBody, TYPE_LABEL, USER_TYPES, type ActivityValues, type UserType } from './schema'
-
-export type Prefill = { contact_id?: number | null; deal_id?: number | null }
+import {
+  activityDefaults,
+  activitySchema,
+  toActivityBody,
+  TYPE_LABEL,
+  USER_TYPES,
+  type ActivityValues,
+  type Prefill,
+} from './schema'
 
 type Props = {
   open: boolean
@@ -38,7 +44,15 @@ function WhenListsLoaded(props: Omit<Props, 'open'>) {
   return <ActivityFormBody {...props} />
 }
 
-const FIELDS = ['type', 'contact_id', 'deal_id', 'description', 'occurred_on', 'follow_up_on', 'done']
+const FIELDS = [
+  'type',
+  'contact_id',
+  'deal_id',
+  'description',
+  'occurred_on',
+  'follow_up_on',
+  'done',
+]
 
 export function ActivityFormBody({ activity, prefill, onClose }: Omit<Props, 'open'>) {
   const save = useSaveActivity()
@@ -46,41 +60,35 @@ export function ActivityFormBody({ activity, prefill, onClose }: Omit<Props, 'op
   const deals = useDeals()
   const notify = useToast()
   const [formError, setFormError] = useState('')
-  const { register, handleSubmit, formState, setError, trigger, watch, setValue, getValues } = useForm<ActivityValues>({
+  const {
+    register,
+    handleSubmit,
+    formState,
+    setError,
+    trigger,
+    control,
+    setValue,
+    getValues,
+    setFocus,
+  } = useForm<ActivityValues>({
     resolver: zodResolver(activitySchema),
     mode: 'all',
-    defaultValues: activity
-      ? {
-          type: activity.type as UserType,
-          contact_id: activity.contact_id ? String(activity.contact_id) : '',
-          deal_id: activity.deal_id ? String(activity.deal_id) : '',
-          description: activity.description,
-          occurred_on: activity.occurred_on,
-          follow_up_on: activity.follow_up_on ?? '',
-          done: activity.done,
-        }
-      : {
-          type: 'note',
-          contact_id: prefill?.contact_id ? String(prefill.contact_id) : '',
-          deal_id: prefill?.deal_id ? String(prefill.deal_id) : '',
-          description: '',
-          occurred_on: today(),
-          follow_up_on: '',
-          done: false,
-        },
+    defaultValues: activityDefaults(activity, prefill, today()),
   })
   useEffect(() => {
     trigger()
-  }, [trigger])
+    setFocus('description')
+  }, [trigger, setFocus])
   const e = formState.errors
-  const type = watch('type')
-  const followUp = watch('follow_up_on')
+  const type = useWatch({ control, name: 'type' })
+  const followUp = useWatch({ control, name: 'follow_up_on' })
 
   const dealField = register('deal_id', {
     // Picking a deal fills in its main contact when no contact is chosen yet.
     onChange: (event) => {
       const deal = deals.data?.find((d) => String(d.id) === event.target.value)
-      if (deal?.contact_id && !getValues('contact_id')) setValue('contact_id', String(deal.contact_id), { shouldValidate: true })
+      if (deal?.contact_id && !getValues('contact_id'))
+        setValue('contact_id', String(deal.contact_id), { shouldValidate: true })
       trigger('contact_id')
     },
   })
@@ -92,7 +100,8 @@ export function ActivityFormBody({ activity, prefill, onClose }: Omit<Props, 'op
       notify(activity ? 'Activity saved.' : `${TYPE_LABEL[values.type]} logged.`)
       onClose()
     } catch (err) {
-      if (err instanceof ApiError && err.status === 422) setFormError(applyServerErrors(err.errors, setError, FIELDS))
+      if (err instanceof ApiError && err.status === 422)
+        setFormError(applyServerErrors(err.errors, setError, FIELDS))
       else setFormError("Couldn't save. Check that the app is running and try again.")
     }
   })
@@ -117,7 +126,10 @@ export function ActivityFormBody({ activity, prefill, onClose }: Omit<Props, 'op
           </div>
         </Field>
         <Field label="Contact" htmlFor="act-contact" required error={e.contact_id?.message}>
-          <select {...invalid('act-contact', e.contact_id?.message)} {...register('contact_id', { onChange: () => trigger('contact_id') })}>
+          <select
+            {...invalid('act-contact', e.contact_id?.message)}
+            {...register('contact_id', { onChange: () => trigger('contact_id') })}
+          >
             <option value="">No contact</option>
             {contacts.data?.map((c) => (
               <option key={c.id} value={c.id}>
@@ -137,14 +149,29 @@ export function ActivityFormBody({ activity, prefill, onClose }: Omit<Props, 'op
           </select>
         </Field>
         <Field label="Description" htmlFor="act-desc" required error={e.description?.message}>
-          <textarea {...invalid('act-desc', e.description?.message)} {...register('description')} autoFocus rows={3} placeholder="What happened, or what needs doing" />
+          <textarea
+            {...invalid('act-desc', e.description?.message)}
+            {...register('description')}
+            rows={3}
+            placeholder="What happened, or what needs doing"
+          />
         </Field>
         <div className="field-row">
           <Field label="Date" htmlFor="act-date" required error={e.occurred_on?.message}>
-            <input {...invalid('act-date', e.occurred_on?.message)} {...register('occurred_on')} type="date" className={`in num${e.occurred_on ? ' bad' : ''}`} />
+            <input
+              {...invalid('act-date', e.occurred_on?.message)}
+              {...register('occurred_on')}
+              type="date"
+              className={`in num${e.occurred_on ? ' bad' : ''}`}
+            />
           </Field>
           <Field label="Follow-up date" htmlFor="act-follow">
-            <input {...invalid('act-follow')} {...register('follow_up_on')} type="date" className="in num" />
+            <input
+              {...invalid('act-follow')}
+              {...register('follow_up_on')}
+              type="date"
+              className="in num"
+            />
           </Field>
         </div>
         <label className="check">
@@ -157,7 +184,11 @@ export function ActivityFormBody({ activity, prefill, onClose }: Omit<Props, 'op
         <button type="button" className="btn ghost" onClick={onClose}>
           Cancel
         </button>
-        <button type="submit" className="btn" disabled={!formState.isValid || formState.isSubmitting}>
+        <button
+          type="submit"
+          className="btn"
+          disabled={!formState.isValid || formState.isSubmitting}
+        >
           Save activity
         </button>
       </div>

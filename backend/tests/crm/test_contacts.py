@@ -3,12 +3,27 @@ from tests import factories as f
 
 def test_crud(client):
     org = f.org(client)
-    c = f.contact(client, "Maya Okafor", email="maya@northwind.co", phone="(206) 555-0142",
-                  job_title="Head of Operations", organization_id=org["id"], status="qualified")
+    c = f.contact(
+        client,
+        "Maya Okafor",
+        email="maya@northwind.co",
+        phone="(206) 555-0142",
+        job_title="Head of Operations",
+        organization_id=org["id"],
+        status="qualified",
+    )
     assert c["organization_name"] == "Atlas Engineering" and c["status"] == "qualified"
 
-    edited = f.ok(client.patch(f"/api/contacts/{c['id']}", json={"status": "customer", "organization_id": None}))
-    assert edited["status"] == "customer" and edited["organization_id"] is None and edited["email"] == "maya@northwind.co"
+    edited = f.ok(
+        client.patch(
+            f"/api/contacts/{c['id']}", json={"status": "customer", "organization_id": None}
+        )
+    )
+    assert (
+        edited["status"] == "customer"
+        and edited["organization_id"] is None
+        and edited["email"] == "maya@northwind.co"
+    )
 
     assert [x["name"] for x in f.ok(client.get("/api/contacts"))] == ["Maya Okafor"]
     f.ok(client.delete(f"/api/contacts/{c['id']}"), 204)
@@ -33,7 +48,11 @@ def test_filter_by_status(client):
     f.contact(client, "Lena Lead")
     f.contact(client, "Quinn Qualified", status="qualified")
     f.contact(client, "Cora Customer", status="customer")
-    for status, name in [("lead", "Lena Lead"), ("qualified", "Quinn Qualified"), ("customer", "Cora Customer")]:
+    for status, name in [
+        ("lead", "Lena Lead"),
+        ("qualified", "Quinn Qualified"),
+        ("customer", "Cora Customer"),
+    ]:
         assert [c["name"] for c in f.ok(client.get(f"/api/contacts?status={status}"))] == [name]
     assert len(f.ok(client.get("/api/contacts"))) == 3
 

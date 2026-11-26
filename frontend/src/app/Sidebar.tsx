@@ -9,7 +9,12 @@ export function Sidebar() {
       </div>
       <nav aria-label="Sections">
         {NAV.map(({ label, path, icon: Icon }) => (
-          <NavLink key={path} to={path} end={path === '/'} className={({ isActive }) => (isActive ? 'active' : '')}>
+          <NavLink
+            key={path}
+            to={path}
+            end={path === '/'}
+            className={({ isActive }) => (isActive ? 'active' : '')}
+          >
             <Icon size={16} strokeWidth={2} aria-hidden />
             {label}
           </NavLink>

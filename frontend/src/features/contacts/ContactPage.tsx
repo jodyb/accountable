@@ -27,7 +27,9 @@ export function ContactPage() {
   if (contact.isPending) return <Loading />
   if (contact.isError) return <LoadError what="this contact" />
   const c = contact.data
-  const sub = [c.job_title, c.organization_name].filter(Boolean).join(' at ') || 'No job title or organization'
+  const sub =
+    [c.job_title, c.organization_name].filter(Boolean).join(' at ') ||
+    'No job title or organization'
 
   return (
     <>
@@ -119,11 +121,20 @@ export function ContactPage() {
             <h2>Timeline</h2>
             <span className="hint">Newest first</span>
           </div>
-          {timeline.data ? <Timeline activities={timeline.data} show="deal" onEdit={setLogging} /> : <Loading />}
+          {timeline.data ? (
+            <Timeline activities={timeline.data} show="deal" onEdit={setLogging} />
+          ) : (
+            <Loading />
+          )}
         </div>
       </div>
       <ContactForm open={editing} contact={c} onClose={() => setEditing(false)} />
-      <ActivityForm open={logging !== undefined} activity={logging} prefill={{ contact_id: c.id }} onClose={() => setLogging(undefined)} />
+      <ActivityForm
+        open={logging !== undefined}
+        activity={logging}
+        prefill={{ contact_id: c.id }}
+        onClose={() => setLogging(undefined)}
+      />
       <DeleteDialog
         kind="contact"
         record={deleting ? c : null}

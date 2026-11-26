@@ -14,10 +14,18 @@ export function StageTrack({ stage }: { stage: Stage }) {
           i === current
             ? { background: STAGE_COLOR[s].bg, color: STAGE_COLOR[s].fg }
             : done
-              ? { background: `color-mix(in srgb, ${STAGE_COLOR[s].bg} 35%, var(--white))`, color: 'var(--midnight)' }
+              ? {
+                  background: `color-mix(in srgb, ${STAGE_COLOR[s].bg} 35%, var(--white))`,
+                  color: 'var(--midnight)',
+                }
               : undefined
         return (
-          <div key={s} className="st" style={style} aria-current={i === current ? 'step' : undefined}>
+          <div
+            key={s}
+            className="st"
+            style={style}
+            aria-current={i === current ? 'step' : undefined}
+          >
             {done && <Check size={14} />}
             {s}
           </div>
@@ -28,7 +36,9 @@ export function StageTrack({ stage }: { stage: Stage }) {
         <div
           key={s}
           className="st end"
-          style={stage === s ? { background: STAGE_COLOR[s].bg, color: STAGE_COLOR[s].fg } : undefined}
+          style={
+            stage === s ? { background: STAGE_COLOR[s].bg, color: STAGE_COLOR[s].fg } : undefined
+          }
           aria-current={stage === s ? 'step' : undefined}
         >
           {s}

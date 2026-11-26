@@ -15,13 +15,36 @@
     "seed": "uv run python -m accountable.crm.seed --reset",
     "types": "uv run python -m accountable.openapi frontend/openapi.json && npm run types -w frontend",
     "types:check": "uv run python -m accountable.openapi frontend/openapi.json && npm run types:check -w frontend",
-    "test": "npm run types:check && npm run typecheck -w frontend && npm run typecheck:e2e && npm run test -w frontend && uv run pytest && playwright test",
-    "test:e2e": "playwright test",
-    "typecheck:e2e": "tsc -p e2e/tsconfig.json"
+    "check": "node scripts/check.mjs",
+    "check:quick": "node scripts/check.mjs --quick",
+    "format": "prettier --write frontend e2e scripts playwright.config.ts eslint.config.mjs && uv run ruff format .",
+    "format:check": "npm run format:check:web && npm run format:check:py",
+    "format:check:web": "prettier --check frontend e2e scripts playwright.config.ts eslint.config.mjs",
+    "format:check:py": "uv run ruff format --check .",
+    "lint": "npm run lint:web && npm run lint:py",
+    "lint:web": "eslint --max-warnings 0 frontend e2e scripts playwright.config.ts eslint.config.mjs",
+    "lint:py": "uv run ruff check .",
+    "typecheck:web": "npm run typecheck -w frontend",
+    "typecheck:e2e": "tsc -p e2e/tsconfig.json",
+    "typecheck:py": "uv run ty check",
+    "secrets": "gitleaks git --no-banner --redact && gitleaks dir . --no-banner --redact --config .gitleaks-worktree.toml",
+    "test": "npm run test:unit && playwright test",
+    "test:unit": "npm run types:check && npm run typecheck:web && npm run typecheck:e2e && npm run test:web && npm run test:py",
+    "test:web": "npm run test -w frontend",
+    "test:py": "uv run pytest --cov",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "@playwright/test": "^1.65.1",
     "@types/node": "^26.6.6",
-    "concurrently": "^10.0.7"
+    "concurrently": "^10.0.7",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.14.0",
+    "prettier": "^3.10.1",
+    "typescript-eslint": "^8.74.0"
   }
 }

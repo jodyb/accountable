@@ -2,9 +2,10 @@
 
 from collections.abc import Iterator
 from pathlib import Path
+from typing import Annotated
 
-from fastapi import HTTPException
-from sqlalchemy import Connection, Engine, MetaData, create_engine, event
+from fastapi import Depends, HTTPException
+from sqlalchemy import Connection, Engine, Insert, MetaData, create_engine, event
 
 from accountable import config
 
@@ -57,7 +58,19 @@ def one_or_404(conn: Connection, stmt, what: str):
     return row
 
 
+def insert_id(conn: Connection, stmt: Insert) -> int:
+    """Run an insert and return the new row's id."""
+    key = conn.execute(stmt).inserted_primary_key
+    if key is None:
+        raise RuntimeError("insert returned no primary key")
+    return key[0]
+
+
 def get_conn() -> Iterator[Connection]:
     """One transaction per request. Sign-in will attach the current user here later."""
     with get_engine().begin() as conn:
         yield conn
+
+
+# The request's connection, for route parameters.
+Conn = Annotated[Connection, Depends(get_conn)]

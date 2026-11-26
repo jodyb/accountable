@@ -22,10 +22,24 @@ type Props = {
 
 export const columnId = (stage: Stage) => `col:${stage}`
 
-export function BoardColumn({ stage, deals, totals, today, dragDisabled, dropLineAt, leaving, onAdd }: Props) {
+export function BoardColumn({
+  stage,
+  deals,
+  totals,
+  today,
+  dragDisabled,
+  dropLineAt,
+  leaving,
+  onAdd,
+}: Props) {
   const { setNodeRef } = useDroppable({ id: columnId(stage), data: { stage } })
   return (
-    <section ref={setNodeRef} className={`col${isOpen(stage) ? '' : ' closed'}`} aria-label={`${stage} column`} data-stage={stage}>
+    <section
+      ref={setNodeRef}
+      className={`col${isOpen(stage) ? '' : ' closed'}`}
+      aria-label={`${stage} column`}
+      data-stage={stage}
+    >
       <div className="col-h">
         <div className="col-t">
           <span className="sw" style={{ background: STAGE_COLOR[stage].bg }} />
@@ -36,14 +50,24 @@ export function BoardColumn({ stage, deals, totals, today, dragDisabled, dropLin
         </div>
         <div className="col-m">
           <span>
-            Value <b className="num" data-testid="col-value">{moneyCompact(totals.value_cents)}</b>
+            Value{' '}
+            <b className="num" data-testid="col-value">
+              {moneyCompact(totals.value_cents)}
+            </b>
           </span>
           <span>
-            Expected <b className="num" data-testid="col-expected">{moneyCompact(totals.expected_cents)}</b>
+            Expected{' '}
+            <b className="num" data-testid="col-expected">
+              {moneyCompact(totals.expected_cents)}
+            </b>
           </span>
         </div>
       </div>
-      <SortableContext id={columnId(stage)} items={deals.map((d) => d.id)} strategy={verticalListSortingStrategy}>
+      <SortableContext
+        id={columnId(stage)}
+        items={deals.map((d) => d.id)}
+        strategy={verticalListSortingStrategy}
+      >
         <div className="cards">
           {deals.map((d, i) => (
             <Fragment key={d.id}>
@@ -51,10 +75,17 @@ export function BoardColumn({ stage, deals, totals, today, dragDisabled, dropLin
               <SortableDealCard deal={d} today={today} disabled={dragDisabled} leaving={leaving} />
             </Fragment>
           ))}
-          {dropLineAt !== null && dropLineAt >= deals.length && <div className="drop" data-testid="drop-line" />}
+          {dropLineAt !== null && dropLineAt >= deals.length && (
+            <div className="drop" data-testid="drop-line" />
+          )}
         </div>
       </SortableContext>
-      <button type="button" className="add" onClick={() => onAdd(stage)} aria-label={`Add deal in ${stage}`}>
+      <button
+        type="button"
+        className="add"
+        onClick={() => onAdd(stage)}
+        aria-label={`Add deal in ${stage}`}
+      >
         <Plus size={14} /> Add deal
       </button>
     </section>

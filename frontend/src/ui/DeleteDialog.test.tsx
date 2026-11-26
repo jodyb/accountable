@@ -21,7 +21,9 @@ describe('deleteMessage', () => {
     )
   })
   it('deal: activities go', () => {
-    expect(deleteMessage('deal', { contacts: 0, deals: 0, activities: 4 })).toBe('Its 4 activities will be deleted.')
+    expect(deleteMessage('deal', { contacts: 0, deals: 0, activities: 4 })).toBe(
+      'Its 4 activities will be deleted.',
+    )
   })
 })
 
@@ -29,15 +31,27 @@ describe('DeleteDialog', () => {
   afterEach(() => vi.unstubAllGlobals())
 
   it('names the record and shows the counts from the server', async () => {
-    const fetch = vi.fn(async () => new Response(JSON.stringify({ contacts: 2, deals: 3, activities: 0 }), { status: 200 }))
+    const fetch = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ contacts: 2, deals: 3, activities: 0 }), { status: 200 }),
+    )
     vi.stubGlobal('fetch', fetch)
     render(
       <QueryClientProvider client={new QueryClient()}>
-        <DeleteDialog kind="organization" record={{ id: 7, name: 'Brightline Retail' }} onClose={() => {}} onConfirm={async () => {}} />
+        <DeleteDialog
+          kind="organization"
+          record={{ id: 7, name: 'Brightline Retail' }}
+          onClose={() => {}}
+          onConfirm={async () => {}}
+        />
       </QueryClientProvider>,
     )
     expect(screen.getByRole('heading', { name: 'Delete Brightline Retail?' })).toBeInTheDocument()
-    expect(await screen.findByText("Its 2 contacts and 3 deals will be kept, with no organization. This can't be undone.")).toBeInTheDocument()
+    expect(
+      await screen.findByText(
+        "Its 2 contacts and 3 deals will be kept, with no organization. This can't be undone.",
+      ),
+    ).toBeInTheDocument()
     expect(fetch).toHaveBeenCalledWith('/api/organizations/7/delete-impact', expect.anything())
     expect(screen.getByRole('button', { name: 'Delete organization' })).toBeEnabled()
   })

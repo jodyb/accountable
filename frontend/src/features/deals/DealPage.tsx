@@ -30,7 +30,9 @@ export function DealPage() {
   if (deal.isError) return <LoadError what="this deal" />
   const d = deal.data
   const closed = d.stage === 'Won' || d.stage === 'Lost'
-  const sub = [d.organization_name, d.contact_name].filter(Boolean).join(' · ') || 'No organization or main contact'
+  const sub =
+    [d.organization_name, d.contact_name].filter(Boolean).join(' · ') ||
+    'No organization or main contact'
 
   return (
     <>
@@ -81,7 +83,11 @@ export function DealPage() {
             <h2>Timeline</h2>
             <span className="hint">Newest first</span>
           </div>
-          {timeline.data ? <Timeline activities={timeline.data} show="contact" onEdit={setLogging} /> : <Loading />}
+          {timeline.data ? (
+            <Timeline activities={timeline.data} show="contact" onEdit={setLogging} />
+          ) : (
+            <Loading />
+          )}
         </div>
         <div className="panel">
           <div className="ph">
@@ -115,7 +121,13 @@ export function DealPage() {
             <dt>Created</dt>
             <dd className="num">{displayDate(d.created_at)}</dd>
             <dt>Last activity</dt>
-            <dd className="num">{d.last_activity_on ? displayDate(d.last_activity_on) : <span className="none">None</span>}</dd>
+            <dd className="num">
+              {d.last_activity_on ? (
+                displayDate(d.last_activity_on)
+              ) : (
+                <span className="none">None</span>
+              )}
+            </dd>
           </dl>
         </div>
       </div>

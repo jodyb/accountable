@@ -21,21 +21,96 @@ RANDOM_SEED = 20261124
 
 # name, industry, website, notes
 ORGANIZATIONS = [
-    ("Atlas Engineering", "Engineering", "atlas-eng.com", "Civil and structural engineering firm with five offices in the Pacific Northwest. Renewing all site licences in Q1."),
-    ("Bluewater Marine", "Logistics", "bluewatermarine.com", "Coastal freight operator with 40 vessels out of Norfolk."),
-    ("Brightline Retail", "Retail", "brightline.shop", "Twenty-two stores across the Midwest. The store systems team is small and stretched."),
-    ("Cedar & Pine Legal", "Legal services", "cedarpine.law", "Mid-sized law firm. Very careful about where client documents are stored."),
-    ("Fernhill Architects", "Architecture", "fernhill.design", "Design studio of about 60 people in Austin."),
-    ("Harbor Health", "Healthcare", "harborhealth.org", "Nine clinics in Oregon. Procurement goes through a committee that meets monthly."),
-    ("Juniper Foods", "Food and beverage", "juniperfoods.com", "Regional food distributor with three cold-storage warehouses."),
-    ("Kestrel Manufacturing", "Manufacturing", "kestrelmfg.com", "Precision parts for aerospace. Two plants in Ohio."),
-    ("Northwind Logistics", "Logistics", "northwind.co", "Last-mile delivery for retailers around Seattle. Long-standing customer."),
-    ("Orchard Lane Schools", "Education", "orchardlane.edu", "Private school group with four campuses. Budget year starts in July."),
-    ("Pioneer Solar", "Energy", "pioneersolar.io", "Residential solar installer growing fast in Arizona."),
-    ("Summit Credit Union", "Financial services", "summitcu.org", "Member-owned credit union with 14 branches in Colorado."),
-    ("Lakeside Hotels", "Hospitality", "lakesidehotels.com", "Six boutique hotels around the Great Lakes."),
-    ("Granite Peak Construction", "Construction", "granitepeakbuild.com", "Commercial builder. Project managers work mostly from site."),
-    ("Meridian Dental Group", "Healthcare", "meridiandental.com", "Twelve dental practices sharing one back office."),
+    (
+        "Atlas Engineering",
+        "Engineering",
+        "atlas-eng.com",
+        "Civil and structural engineering firm with five offices in the Pacific Northwest. Renewing all site licences in Q1.",
+    ),
+    (
+        "Bluewater Marine",
+        "Logistics",
+        "bluewatermarine.com",
+        "Coastal freight operator with 40 vessels out of Norfolk.",
+    ),
+    (
+        "Brightline Retail",
+        "Retail",
+        "brightline.shop",
+        "Twenty-two stores across the Midwest. The store systems team is small and stretched.",
+    ),
+    (
+        "Cedar & Pine Legal",
+        "Legal services",
+        "cedarpine.law",
+        "Mid-sized law firm. Very careful about where client documents are stored.",
+    ),
+    (
+        "Fernhill Architects",
+        "Architecture",
+        "fernhill.design",
+        "Design studio of about 60 people in Austin.",
+    ),
+    (
+        "Harbor Health",
+        "Healthcare",
+        "harborhealth.org",
+        "Nine clinics in Oregon. Procurement goes through a committee that meets monthly.",
+    ),
+    (
+        "Juniper Foods",
+        "Food and beverage",
+        "juniperfoods.com",
+        "Regional food distributor with three cold-storage warehouses.",
+    ),
+    (
+        "Kestrel Manufacturing",
+        "Manufacturing",
+        "kestrelmfg.com",
+        "Precision parts for aerospace. Two plants in Ohio.",
+    ),
+    (
+        "Northwind Logistics",
+        "Logistics",
+        "northwind.co",
+        "Last-mile delivery for retailers around Seattle. Long-standing customer.",
+    ),
+    (
+        "Orchard Lane Schools",
+        "Education",
+        "orchardlane.edu",
+        "Private school group with four campuses. Budget year starts in July.",
+    ),
+    (
+        "Pioneer Solar",
+        "Energy",
+        "pioneersolar.io",
+        "Residential solar installer growing fast in Arizona.",
+    ),
+    (
+        "Summit Credit Union",
+        "Financial services",
+        "summitcu.org",
+        "Member-owned credit union with 14 branches in Colorado.",
+    ),
+    (
+        "Lakeside Hotels",
+        "Hospitality",
+        "lakesidehotels.com",
+        "Six boutique hotels around the Great Lakes.",
+    ),
+    (
+        "Granite Peak Construction",
+        "Construction",
+        "granitepeakbuild.com",
+        "Commercial builder. Project managers work mostly from site.",
+    ),
+    (
+        "Meridian Dental Group",
+        "Healthcare",
+        "meridiandental.com",
+        "Twelve dental practices sharing one back office.",
+    ),
 ]
 
 # name, job title, organization (None for independents), status, area code
@@ -130,7 +205,12 @@ DEALS = [
 WON_MONTHS_AGO = [0, 0, 1, 1, 2, 3, 4, 5, 6, 7, 8, 10, 11]
 LOST_MONTHS_AGO = [0, 2, 4, 6, 8, 9]
 # Open deals running late, and how many days ago they should have closed.
-LATE_DAYS = {"Store analytics": 22, "POS rollout phase 2": 9, "Annual support renewal": 4, "Design workstation leasing": 15}
+LATE_DAYS = {
+    "Store analytics": 22,
+    "POS rollout phase 2": 9,
+    "Annual support renewal": 4,
+    "Design workstation leasing": 15,
+}
 # A probability set by hand, not the stage default.
 HAND_SET_PROBABILITY = {"Cold chain monitoring": 80, "Patient portal": 40}
 
@@ -203,29 +283,39 @@ def load(conn: Connection, today: date) -> None:
     industries: dict[str, str] = {}
     for name, industry, website, notes in ORGANIZATIONS:
         created = today - timedelta(days=rng.randint(200, 400))
-        org_ids[name] = conn.execute(
+        org_ids[name] = db.insert_id(
+            conn,
             insert(organizations).values(
-                name=name, industry=industry, website=website, notes=notes,
-                created_at=stamp(created), updated_at=stamp(created),
-            )
-        ).inserted_primary_key[0]
+                name=name,
+                industry=industry,
+                website=website,
+                notes=notes,
+                created_at=stamp(created),
+                updated_at=stamp(created),
+            ),
+        )
         websites[name], industries[name] = website, industry
 
     contact_ids: dict[str, int] = {}
     for i, (name, title, org, status, area) in enumerate(CONTACTS):
         created = today - timedelta(days=rng.randint(30, 360))
-        contact_ids[name] = conn.execute(
+        contact_ids[name] = db.insert_id(
+            conn,
             insert(contacts).values(
-                name=name, job_title=title, organization_id=org_ids.get(org) if org else None,
-                status=status, email=email_for(name, websites.get(org) if org else None),
+                name=name,
+                job_title=title,
+                organization_id=org_ids.get(org) if org else None,
+                status=status,
+                email=email_for(name, websites.get(org) if org else None),
                 phone=f"({area}) 555-{100 + i * 7:04d}",
-                created_at=stamp(created), updated_at=stamp(created),
-            )
-        ).inserted_primary_key[0]
+                created_at=stamp(created),
+                updated_at=stamp(created),
+            ),
+        )
 
     won_months = iter(WON_MONTHS_AGO)
     lost_months = iter(LOST_MONTHS_AGO)
-    positions = {s: 0 for s in stages.STAGES}
+    positions: dict[str, int] = dict.fromkeys(stages.STAGES, 0)
     deal_rows = []
     for name, org, contact, stage, dollars in DEALS:
         if stage == "Won":
@@ -238,16 +328,33 @@ def load(conn: Connection, today: date) -> None:
             close = today + timedelta(days=rng.randint(10, 150))
         created = min(close, today) - timedelta(days=rng.randint(30, 90))
         probability = HAND_SET_PROBABILITY.get(name, stages.DEFAULT_PROBABILITY[stage])
-        deal_id = conn.execute(
+        deal_id = db.insert_id(
+            conn,
             insert(deals).values(
-                name=name, organization_id=org_ids[org], contact_id=contact_ids[contact],
-                stage=stage, value_cents=dollars * 100, probability=probability, close_date=close,
-                position=positions[stage], created_at=stamp(created), updated_at=stamp(created),
-            )
-        ).inserted_primary_key[0]
+                name=name,
+                organization_id=org_ids[org],
+                contact_id=contact_ids[contact],
+                stage=stage,
+                value_cents=dollars * 100,
+                probability=probability,
+                close_date=close,
+                position=positions[stage],
+                created_at=stamp(created),
+                updated_at=stamp(created),
+            ),
+        )
         positions[stage] += 1
-        deal_rows.append({"id": deal_id, "name": name, "org": org, "contact": contact,
-                          "stage": stage, "close": close, "created": created})
+        deal_rows.append(
+            {
+                "id": deal_id,
+                "name": name,
+                "org": org,
+                "contact": contact,
+                "stage": stage,
+                "close": close,
+                "created": created,
+            }
+        )
 
     _load_activities(conn, rng, today, deal_rows, contact_ids, industries)
 
@@ -266,26 +373,41 @@ def _load_activities(conn, rng, today, deal_rows, contact_ids, industries) -> No
             kind = kinds[k % 3]
             k += 1
             text = rng.choice(pools[kind]).format(
-                first=d["contact"].split()[0], deal=d["name"].lower(), industry=industries[d["org"]].lower()
+                first=d["contact"].split()[0],
+                deal=d["name"].lower(),
+                industry=industries[d["org"]].lower(),
             )
             span = max((last_day - first_day).days, 1)
-            rows.append({
-                "type": kind, "contact_id": contact_ids[d["contact"]], "deal_id": d["id"],
-                "description": text, "occurred_on": first_day + timedelta(days=rng.randint(0, span)),
-                "follow_up_on": None, "done": False, "_open": is_open,
-            })
+            rows.append(
+                {
+                    "type": kind,
+                    "contact_id": contact_ids[d["contact"]],
+                    "deal_id": d["id"],
+                    "description": text,
+                    "occurred_on": first_day + timedelta(days=rng.randint(0, span)),
+                    "follow_up_on": None,
+                    "done": False,
+                    "_open": is_open,
+                }
+            )
 
     # Leads with no deals yet get a contact-only entry.
     with_deals = {d["contact"] for d in deal_rows}
     for name, *_ in CONTACTS:
         if name not in with_deals:
             kind, text = rng.choice(LEAD_NOTES)
-            rows.append({
-                "type": kind, "contact_id": contact_ids[name], "deal_id": None,
-                "description": text.format(first=name.split()[0]),
-                "occurred_on": today - timedelta(days=rng.randint(3, 60)),
-                "follow_up_on": None, "done": False, "_open": False,
-            })
+            rows.append(
+                {
+                    "type": kind,
+                    "contact_id": contact_ids[name],
+                    "deal_id": None,
+                    "description": text.format(first=name.split()[0]),
+                    "occurred_on": today - timedelta(days=rng.randint(3, 60)),
+                    "follow_up_on": None,
+                    "done": False,
+                    "_open": False,
+                }
+            )
 
     # Follow-ups: some overdue, some due this week, a few later, some already done.
     open_rows = [r for r in rows if r["_open"]]
@@ -305,16 +427,27 @@ def _load_activities(conn, rng, today, deal_rows, contact_ids, industries) -> No
         if d["stage"] == "New":
             continue
         if d["stage"] in ("Won", "Lost"):
-            old = "Negotiation" if d["stage"] == "Won" else rng.choice(["Qualified", "Proposal", "Negotiation"])
+            old = (
+                "Negotiation"
+                if d["stage"] == "Won"
+                else rng.choice(["Qualified", "Proposal", "Negotiation"])
+            )
             when = d["close"]
         else:
             old = stages.STAGES[i - 1]
             when = today - timedelta(days=rng.randint(2, 40))
-        rows.append({
-            "type": "stage_change", "contact_id": contact_ids[d["contact"]], "deal_id": d["id"],
-            "description": stages.stage_change_message(old, d["stage"]), "occurred_on": when,
-            "follow_up_on": None, "done": False, "_open": False,
-        })
+        rows.append(
+            {
+                "type": "stage_change",
+                "contact_id": contact_ids[d["contact"]],
+                "deal_id": d["id"],
+                "description": stages.stage_change_message(old, d["stage"]),
+                "occurred_on": when,
+                "follow_up_on": None,
+                "done": False,
+                "_open": False,
+            }
+        )
 
     rows.sort(key=lambda r: r["occurred_on"])
     for r in rows:
@@ -338,7 +471,9 @@ def reset_database(path: Path, today: date) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Reset the database to the sample data.")
-    parser.add_argument("--reset", action="store_true", help="replace any existing data with the sample data")
+    parser.add_argument(
+        "--reset", action="store_true", help="replace any existing data with the sample data"
+    )
     parser.add_argument("--today", type=date.fromisoformat, default=date.today(), help="YYYY-MM-DD")
     args = parser.parse_args()
 

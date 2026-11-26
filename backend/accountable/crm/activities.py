@@ -4,14 +4,14 @@ Stage changes are activities too, but only the system writes them: they can't
 be created, edited or deleted here, and they go when their deal is deleted.
 """
 
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Response
 from sqlalchemy import Connection, delete, insert, update
 
 from accountable.crm import schemas
 from accountable.crm.deals import check_contact, check_deal
 from accountable.crm.queries import activity_query
 from accountable.crm.tables import activities
-from accountable.db import get_conn, one_or_404
+from accountable.db import Conn, insert_id, one_or_404
 from accountable.errors import FieldError
 
 router = APIRouter(prefix="/activities", tags=["activities"])
@@ -34,19 +34,19 @@ def refuse_stage_change(activity) -> None:
 
 
 @router.get("/{activity_id}", response_model=schemas.Activity)
-def read_activity(activity_id: int, conn: Connection = Depends(get_conn)):
+def read_activity(activity_id: int, conn: Conn):
     return get_activity(conn, activity_id)
 
 
 @router.post("", response_model=schemas.Activity, status_code=201)
-def create_activity(body: schemas.ActivityIn, conn: Connection = Depends(get_conn)):
+def create_activity(body: schemas.ActivityIn, conn: Conn):
     check_links(conn, body.contact_id, body.deal_id)
-    activity_id = conn.execute(insert(activities).values(**body.model_dump())).inserted_primary_key[0]
+    activity_id = insert_id(conn, insert(activities).values(**body.model_dump()))
     return get_activity(conn, activity_id)
 
 
 @router.patch("/{activity_id}", response_model=schemas.Activity)
-def update_activity(activity_id: int, body: schemas.ActivityPatch, conn: Connection = Depends(get_conn)):
+def update_activity(activity_id: int, body: schemas.ActivityPatch, conn: Conn):
     activity = get_activity(conn, activity_id)
     refuse_stage_change(activity)
     changes = body.changes()
@@ -62,7 +62,7 @@ def update_activity(activity_id: int, body: schemas.ActivityPatch, conn: Connect
 
 
 @router.delete("/{activity_id}", status_code=204)
-def delete_activity(activity_id: int, conn: Connection = Depends(get_conn)):
+def delete_activity(activity_id: int, conn: Conn):
     refuse_stage_change(get_activity(conn, activity_id))
     conn.execute(delete(activities).where(activities.c.id == activity_id))
     return Response(status_code=204)

@@ -3,7 +3,9 @@ import { contactSchema, emptyContact, toContactBody } from './schema'
 
 const messages = (values: unknown) => {
   const r = contactSchema.safeParse(values)
-  return r.success ? {} : Object.fromEntries(r.error.issues.map((i) => [i.path.join('.'), i.message]))
+  return r.success
+    ? {}
+    : Object.fromEntries(r.error.issues.map((i) => [i.path.join('.'), i.message]))
 }
 
 describe('contact form', () => {
@@ -19,7 +21,9 @@ describe('contact form', () => {
     expect(messages({ ...emptyContact, name: 'M', email: 'maya@northwind.co' })).toEqual({})
   })
   it('sends the organization as a number, or null', () => {
-    expect(toContactBody({ ...emptyContact, name: 'M', organization_id: '7' }).organization_id).toBe(7)
+    expect(
+      toContactBody({ ...emptyContact, name: 'M', organization_id: '7' }).organization_id,
+    ).toBe(7)
     expect(toContactBody({ ...emptyContact, name: 'M' }).organization_id).toBeNull()
   })
 })

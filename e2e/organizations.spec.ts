@@ -30,7 +30,9 @@ test('add, edit and delete an organization; changes survive reload', async ({ pa
   await page.getByRole('button', { name: 'Delete Zephyr Analytics' }).click()
   const dialog = page.getByRole('alertdialog')
   await expect(dialog.getByRole('heading')).toHaveText('Delete Zephyr Analytics?')
-  await expect(dialog).toContainText("Its 0 contacts and 0 deals will be kept, with no organization. This can't be undone.")
+  await expect(dialog).toContainText(
+    "Its 0 contacts and 0 deals will be kept, with no organization. This can't be undone.",
+  )
   await dialog.getByRole('button', { name: 'Delete organization' }).click()
   await expect(row(page, 'Zephyr Analytics')).toHaveCount(0)
   await page.reload()
@@ -62,7 +64,9 @@ test('search, sort and the empty state', async ({ page }) => {
   await expect(rows(page).first()).toContainText('Atlas Engineering') // back to the list order
 })
 
-test('a row opens the record page with details, contacts, deals, Edit and Delete', async ({ page }) => {
+test('a row opens the record page with details, contacts, deals, Edit and Delete', async ({
+  page,
+}) => {
   await page.goto('/organizations')
   await row(page, 'Atlas Engineering').locator('td').first().click()
   await expect(page).toHaveURL(/\/organizations\/\d+$/)
@@ -78,13 +82,17 @@ test('a row opens the record page with details, contacts, deals, Edit and Delete
   await expect(page.getByRole('button', { name: 'Delete', exact: true })).toBeVisible()
 })
 
-test('deleting an organization keeps its contacts and deals with no organization', async ({ page }) => {
+test('deleting an organization keeps its contacts and deals with no organization', async ({
+  page,
+}) => {
   await page.goto('/organizations')
   await row(page, 'Atlas Engineering').locator('td').first().click()
   await expect(page.getByRole('heading', { level: 1, name: 'Atlas Engineering' })).toBeVisible()
   await page.getByRole('button', { name: 'Delete', exact: true }).click()
   const dialog = page.getByRole('alertdialog')
-  await expect(dialog).toContainText('Its 3 contacts and 2 deals will be kept, with no organization.')
+  await expect(dialog).toContainText(
+    'Its 3 contacts and 2 deals will be kept, with no organization.',
+  )
   await dialog.getByRole('button', { name: 'Delete organization' }).click()
   await expect(page).toHaveURL(/\/organizations$/)
   await expect(rows(page)).toHaveCount(14)

@@ -23,8 +23,37 @@ testpaths = ["backend/tests"]
 addopts = "-q"
 filterwarnings = ["ignore:Using `httpx` with `starlette.testclient` is deprecated"]
 
+[tool.ruff]
+src = ["backend"]
+line-length = 100
+extend-exclude = ["course", "community_contributions"]
+
+[tool.ruff.lint]
+extend-select = ["C901"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+[tool.ty.environment]
+root = ["backend"]
+
+[tool.ty.src]
+include = ["backend"]
+
+[tool.coverage.run]
+source = ["backend/accountable"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+skip_covered = true
+
 [dependency-groups]
 dev = [
     "httpx>=0.28.1",
     "pytest>=9.2.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.17.6",
+    "ty>=0.0.112",
 ]

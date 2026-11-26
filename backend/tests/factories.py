@@ -21,7 +21,9 @@ def contact(client: TestClient, name: str = "Sofia Lindqvist", **kw) -> dict:
     return ok(client.post("/api/contacts", json={"name": name, **kw}), 201)
 
 
-def deal(client: TestClient, name: str = "Multi-site licence", value_cents: int = 1_000_000, **kw) -> dict:
+def deal(
+    client: TestClient, name: str = "Multi-site licence", value_cents: int = 1_000_000, **kw
+) -> dict:
     return ok(client.post("/api/deals", json={"name": name, "value_cents": value_cents, **kw}), 201)
 
 
@@ -31,7 +33,11 @@ def activity(client: TestClient, description: str = "Intro call", **kw) -> dict:
 
 
 def move(client: TestClient, deal_id: int, stage: str, index: int = 0, today: str = TODAY) -> dict:
-    return ok(client.post(f"/api/deals/{deal_id}/move", json={"stage": stage, "index": index, "today": today}))
+    return ok(
+        client.post(
+            f"/api/deals/{deal_id}/move", json={"stage": stage, "index": index, "today": today}
+        )
+    )
 
 
 def column(board: dict, stage: str) -> list[str]:

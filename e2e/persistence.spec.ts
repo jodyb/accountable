@@ -14,10 +14,15 @@ const env = { ...process.env, ACCOUNTABLE_DB: DB }
 const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm'
 
 async function start(): Promise<{ server: ChildProcess; api: APIRequestContext }> {
-  const server = spawn('uv', ['run', 'uvicorn', 'accountable.main:app', '--port', String(PORT)], { env, stdio: 'ignore' })
+  const server = spawn('uv', ['run', 'uvicorn', 'accountable.main:app', '--port', String(PORT)], {
+    env,
+    stdio: 'ignore',
+  })
   const api = await http.newContext({ baseURL: BASE })
   await expect
-    .poll(async () => (await api.get('/api/health').catch(() => null))?.status(), { timeout: 30_000 })
+    .poll(async () => (await api.get('/api/health').catch(() => null))?.status(), {
+      timeout: 30_000,
+    })
     .toBe(200)
   return { server, api }
 }
@@ -44,11 +49,17 @@ test('changes survive a restart, and the seed command resets to the sample data'
   expect(kept).toMatchObject({ name: 'Kept After Restart', industry: 'Testing' })
   await stop(app)
 
-  const seed = spawnSync(npm, ['run', 'seed'], { env, encoding: 'utf8', shell: process.platform === 'win32' })
+  const seed = spawnSync(npm, ['run', 'seed'], {
+    env,
+    encoding: 'utf8',
+    shell: process.platform === 'win32',
+  })
   expect(seed.status, seed.stderr).toBe(0)
 
   app = await start()
-  const names = (await (await app.api.get('/api/organizations')).json()).map((o: { name: string }) => o.name)
+  const names = (await (await app.api.get('/api/organizations')).json()).map(
+    (o: { name: string }) => o.name,
+  )
   expect(names).toHaveLength(15)
   expect(names).not.toContain('Kept After Restart')
   expect((await (await app.api.get('/api/deals')).json()).length).toBe(40)

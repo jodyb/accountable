@@ -1,0 +1,2 @@
+# Generated from the backend's OpenAPI schema; types:check compares it byte for byte.
+frontend/src/lib/api-types.ts

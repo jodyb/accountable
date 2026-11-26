@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { Loading } from '../../app/Layout'
 import { ApiError, type Contact } from '../../lib/api'
 import { STATUS_STYLE } from '../../ui/Badge'
@@ -9,7 +9,14 @@ import { SidePanel } from '../../ui/SidePanel'
 import { useToast } from '../../ui/Toast'
 import { useOrganizations } from '../organizations/queries'
 import { useSaveContact } from './queries'
-import { contactSchema, emptyContact, STATUSES, toContactBody, type ContactValues } from './schema'
+import {
+  contactDefaults,
+  contactSchema,
+  emptyContact,
+  STATUSES,
+  toContactBody,
+  type ContactValues,
+} from './schema'
 
 type Props = {
   open: boolean
@@ -22,7 +29,9 @@ type Props = {
 export function ContactForm({ open, contact, organizationId, onClose }: Props) {
   return (
     <SidePanel open={open} title={contact ? 'Edit contact' : 'New contact'} onClose={onClose}>
-      {open && <WhenListsLoaded contact={contact} organizationId={organizationId} onClose={onClose} />}
+      {open && (
+        <WhenListsLoaded contact={contact} organizationId={organizationId} onClose={onClose} />
+      )}
     </SidePanel>
   )
 }
@@ -39,25 +48,18 @@ function Body({ contact, organizationId, onClose }: Omit<Props, 'open'>) {
   const orgs = useOrganizations()
   const notify = useToast()
   const [formError, setFormError] = useState('')
-  const { register, handleSubmit, formState, setError, trigger, watch, setValue } = useForm<ContactValues>({
-    resolver: zodResolver(contactSchema),
-    mode: 'all',
-    defaultValues: contact
-      ? {
-          name: contact.name,
-          email: contact.email ?? '',
-          phone: contact.phone ?? '',
-          job_title: contact.job_title ?? '',
-          organization_id: contact.organization_id ? String(contact.organization_id) : '',
-          status: contact.status,
-        }
-      : { ...emptyContact, organization_id: organizationId ? String(organizationId) : '' },
-  })
+  const { register, handleSubmit, formState, setError, trigger, control, setValue, setFocus } =
+    useForm<ContactValues>({
+      resolver: zodResolver(contactSchema),
+      mode: 'all',
+      defaultValues: contactDefaults(contact, organizationId),
+    })
   useEffect(() => {
     trigger()
-  }, [trigger])
+    setFocus('name')
+  }, [trigger, setFocus])
   const e = formState.errors
-  const status = watch('status')
+  const status = useWatch({ control, name: 'status' })
 
   const submit = handleSubmit(async (values) => {
     setFormError('')
@@ -76,16 +78,28 @@ function Body({ contact, organizationId, onClose }: Omit<Props, 'open'>) {
     <form onSubmit={submit} noValidate>
       <div className="fields">
         <Field label="Name" htmlFor="contact-name" required error={e.name?.message}>
-          <input {...invalid('contact-name', e.name?.message)} {...register('name')} autoFocus placeholder="For example, Maya Okafor" />
+          <input
+            {...invalid('contact-name', e.name?.message)}
+            {...register('name')}
+            placeholder="For example, Maya Okafor"
+          />
         </Field>
         <Field label="Email" htmlFor="contact-email" error={e.email?.message}>
-          <input {...invalid('contact-email', e.email?.message)} {...register('email')} type="email" />
+          <input
+            {...invalid('contact-email', e.email?.message)}
+            {...register('email')}
+            type="email"
+          />
         </Field>
         <Field label="Phone" htmlFor="contact-phone">
           <input {...invalid('contact-phone')} {...register('phone')} className="in num" />
         </Field>
         <Field label="Job title" htmlFor="contact-title">
-          <input {...invalid('contact-title')} {...register('job_title')} placeholder="For example, Operations Manager" />
+          <input
+            {...invalid('contact-title')}
+            {...register('job_title')}
+            placeholder="For example, Operations Manager"
+          />
         </Field>
         <Field label="Organization" htmlFor="contact-org">
           <select {...invalid('contact-org')} {...register('organization_id')}>
@@ -119,7 +133,11 @@ function Body({ contact, organizationId, onClose }: Omit<Props, 'open'>) {
         <button type="button" className="btn ghost" onClick={onClose}>
           Cancel
         </button>
-        <button type="submit" className="btn" disabled={!formState.isValid || formState.isSubmitting}>
+        <button
+          type="submit"
+          className="btn"
+          disabled={!formState.isValid || formState.isSubmitting}
+        >
           Save contact
         </button>
       </div>

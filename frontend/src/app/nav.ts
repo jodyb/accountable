@@ -1,5 +1,12 @@
 // The one list of sections. A new business area adds its sections here.
-import { Building2, DollarSign, KanbanSquare, LayoutDashboard, Users, type LucideIcon } from 'lucide-react'
+import {
+  Building2,
+  DollarSign,
+  KanbanSquare,
+  LayoutDashboard,
+  Users,
+  type LucideIcon,
+} from 'lucide-react'
 
 export type NavItem = { label: string; path: string; icon: LucideIcon }
 

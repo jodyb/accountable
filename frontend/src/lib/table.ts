@@ -30,7 +30,8 @@ export function sortRows<T>(rows: T[], value: (row: T) => unknown, dir: SortDir)
     const b = value(y)
     const c = compareValues(a, b)
     // Empty values stay last in both directions.
-    const empty = a === null || a === undefined || a === '' || b === null || b === undefined || b === ''
+    const empty =
+      a === null || a === undefined || a === '' || b === null || b === undefined || b === ''
     return dir === 'desc' && !empty ? -c : c
   })
   return sorted

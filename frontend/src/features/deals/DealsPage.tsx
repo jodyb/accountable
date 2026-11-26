@@ -23,7 +23,11 @@ export function dealColumns(day: string): Col<Deal>[] {
       value: (d) => d.organization_name,
       cell: (d) =>
         d.organization_id ? (
-          <Link className="link" to={`/organizations/${d.organization_id}`} onClick={(e) => e.stopPropagation()}>
+          <Link
+            className="link"
+            to={`/organizations/${d.organization_id}`}
+            onClick={(e) => e.stopPropagation()}
+          >
             {d.organization_name}
           </Link>
         ) : (
@@ -36,18 +40,50 @@ export function dealColumns(day: string): Col<Deal>[] {
       value: (d) => d.contact_name,
       cell: (d) =>
         d.contact_id ? (
-          <Link className="link" to={`/contacts/${d.contact_id}`} onClick={(e) => e.stopPropagation()}>
+          <Link
+            className="link"
+            to={`/contacts/${d.contact_id}`}
+            onClick={(e) => e.stopPropagation()}
+          >
             {d.contact_name}
           </Link>
         ) : (
           none
         ),
     },
-    { id: 'stage', header: 'Stage', value: (d) => d.stage, cell: (d) => <StageBadge stage={d.stage} /> },
-    { id: 'value', header: 'Value', align: 'right', value: (d) => d.value_cents, cell: (d) => <span className="num">{money(d.value_cents)}</span> },
-    { id: 'prob', header: 'Prob.', align: 'right', value: (d) => d.probability, cell: (d) => <span className="num">{percent(d.probability)}</span> },
-    { id: 'expected', header: 'Expected', align: 'right', value: (d) => expectedCents(d), cell: (d) => <span className="num">{money(expectedCents(d))}</span> },
-    { id: 'close', header: 'Close date', value: (d) => d.close_date, cell: (d) => <CloseDate deal={d} today={day} /> },
+    {
+      id: 'stage',
+      header: 'Stage',
+      value: (d) => d.stage,
+      cell: (d) => <StageBadge stage={d.stage} />,
+    },
+    {
+      id: 'value',
+      header: 'Value',
+      align: 'right',
+      value: (d) => d.value_cents,
+      cell: (d) => <span className="num">{money(d.value_cents)}</span>,
+    },
+    {
+      id: 'prob',
+      header: 'Prob.',
+      align: 'right',
+      value: (d) => d.probability,
+      cell: (d) => <span className="num">{percent(d.probability)}</span>,
+    },
+    {
+      id: 'expected',
+      header: 'Expected',
+      align: 'right',
+      value: (d) => expectedCents(d),
+      cell: (d) => <span className="num">{money(expectedCents(d))}</span>,
+    },
+    {
+      id: 'close',
+      header: 'Close date',
+      value: (d) => d.close_date,
+      cell: (d) => <CloseDate deal={d} today={day} />,
+    },
   ]
 }
 
@@ -80,7 +116,13 @@ export function DealsPage() {
       <div className="tools">
         <label className="sbox">
           <Search size={16} aria-hidden />
-          <input type="search" placeholder="Search deals" aria-label="Search deals" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <input
+            type="search"
+            placeholder="Search deals"
+            aria-label="Search deals"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </label>
         <span className="count">
           {late > 0 && <span className="late-d">{late} late</span>}
@@ -104,8 +146,12 @@ export function DealsPage() {
         />
       </div>
       <DealForm open={editing !== undefined} deal={editing} onClose={() => setEditing(undefined)} />
-      <DeleteDialog kind="deal" record={deleting} onClose={() => setDeleting(null)} onConfirm={() => remove.mutateAsync(deleting!.id)} />
+      <DeleteDialog
+        kind="deal"
+        record={deleting}
+        onClose={() => setDeleting(null)}
+        onConfirm={() => remove.mutateAsync(deleting!.id)}
+      />
     </>
   )
 }
-

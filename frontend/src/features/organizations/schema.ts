@@ -10,7 +10,12 @@ export const organizationSchema = z.object({
 
 export type OrganizationValues = z.input<typeof organizationSchema>
 
-export const emptyOrganization: OrganizationValues = { name: '', website: '', industry: '', notes: '' }
+export const emptyOrganization: OrganizationValues = {
+  name: '',
+  website: '',
+  industry: '',
+  notes: '',
+}
 
 export function toOrganizationBody(v: OrganizationValues): OrganizationIn {
   return {

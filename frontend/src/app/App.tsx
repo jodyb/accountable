@@ -21,7 +21,8 @@ export function makeQueryClient(): QueryClient {
     // Delete-impact counts are only read while the dialog is open, and refetching them
     // after a delete would ask for a record that no longer exists.
     mutationCache: new MutationCache({
-      onSettled: () => client.invalidateQueries({ predicate: (q) => q.queryKey[0] !== 'delete-impact' }),
+      onSettled: () =>
+        client.invalidateQueries({ predicate: (q) => q.queryKey[0] !== 'delete-impact' }),
     }),
   })
   return client
@@ -35,10 +36,32 @@ function NotFound() {
       title="Page not found"
       sub={
         <>
-          That page doesn't exist. Go to the <Link className="link" to="/">Dashboard</Link>.
+          That page doesn't exist. Go to the{' '}
+          <Link className="link" to="/">
+            Dashboard
+          </Link>
+          .
         </>
       }
     />
+  )
+}
+
+export function AppRoutes() {
+  return (
+    <Routes>
+      <Route element={<Layout />}>
+        <Route index element={<DashboardPage />} />
+        <Route path="organizations" element={<OrganizationsPage />} />
+        <Route path="organizations/:id" element={<OrganizationPage />} />
+        <Route path="contacts" element={<ContactsPage />} />
+        <Route path="contacts/:id" element={<ContactPage />} />
+        <Route path="deals" element={<DealsPage />} />
+        <Route path="deals/:id" element={<DealPage />} />
+        <Route path="pipeline" element={<PipelinePage />} />
+        <Route path="*" element={<NotFound />} />
+      </Route>
+    </Routes>
   )
 }
 
@@ -47,19 +70,7 @@ export function App() {
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
         <BrowserRouter>
-          <Routes>
-            <Route element={<Layout />}>
-              <Route index element={<DashboardPage />} />
-              <Route path="organizations" element={<OrganizationsPage />} />
-              <Route path="organizations/:id" element={<OrganizationPage />} />
-              <Route path="contacts" element={<ContactsPage />} />
-              <Route path="contacts/:id" element={<ContactPage />} />
-              <Route path="deals" element={<DealsPage />} />
-              <Route path="deals/:id" element={<DealPage />} />
-              <Route path="pipeline" element={<PipelinePage />} />
-              <Route path="*" element={<NotFound />} />
-            </Route>
-          </Routes>
+          <AppRoutes />
         </BrowserRouter>
       </ToastProvider>
     </QueryClientProvider>

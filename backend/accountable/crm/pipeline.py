@@ -1,15 +1,25 @@
 """The pipeline board, and moving a card on it."""
 
-from fastapi import APIRouter, Depends
-from sqlalchemy import Connection
+from collections.abc import Sequence
+
+from fastapi import APIRouter
+from sqlalchemy import Connection, RowMapping
 
 from accountable.crm import schemas, stages
 from accountable.crm.deals import move_deal
 from accountable.crm.queries import deal_query
 from accountable.crm.tables import deals
-from accountable.db import get_conn
+from accountable.db import Conn
 
 router = APIRouter(tags=["pipeline"])
+
+
+def value_cents(cards: Sequence[RowMapping]) -> int:
+    return sum(c["value_cents"] for c in cards)
+
+
+def expected_cents(cards: Sequence[RowMapping]) -> float:
+    return sum(stages.expected_cents(c["value_cents"], c["probability"]) for c in cards)
 
 
 def build_board(conn: Connection) -> dict:
@@ -21,26 +31,26 @@ def build_board(conn: Connection) -> dict:
             {
                 "stage": stage,
                 "count": len(cards),
-                "value_cents": sum(c["value_cents"] for c in cards),
-                "expected_cents": sum(stages.expected_cents(c["value_cents"], c["probability"]) for c in cards),
+                "value_cents": value_cents(cards),
+                "expected_cents": expected_cents(cards),
                 "deals": cards,
             }
         )
-    open_columns = [c for c in columns if stages.is_open(c["stage"])]
+    open_deals = [r for r in rows if stages.is_open(r["stage"])]
     return {
         "columns": columns,
-        "open_value_cents": sum(c["value_cents"] for c in open_columns),
-        "open_expected_cents": sum(c["expected_cents"] for c in open_columns),
+        "open_value_cents": value_cents(open_deals),
+        "open_expected_cents": expected_cents(open_deals),
     }
 
 
 @router.get("/pipeline", response_model=schemas.Board)
-def read_pipeline(conn: Connection = Depends(get_conn)):
+def read_pipeline(conn: Conn):
     return build_board(conn)
 
 
 @router.post("/deals/{deal_id}/move", response_model=schemas.Board, tags=["deals"])
-def move(deal_id: int, body: schemas.MoveIn, conn: Connection = Depends(get_conn)):
+def move(deal_id: int, body: schemas.MoveIn, conn: Conn):
     """Change stage (if different) and place the card at index in that column."""
     move_deal(conn, deal_id, body.stage, body.index, body.today)
     return build_board(conn)

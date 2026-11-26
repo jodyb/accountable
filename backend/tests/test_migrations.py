@@ -4,7 +4,7 @@ from alembic.autogenerate import compare_metadata
 from alembic.migration import MigrationContext
 from alembic.script import ScriptDirectory
 from fastapi.testclient import TestClient
-from sqlalchemy import inspect, insert, select
+from sqlalchemy import insert, inspect, select
 
 from accountable import db, migrate
 from accountable.crm.tables import organizations
@@ -31,8 +31,15 @@ def test_upgrade_builds_tables_constraints_and_indexes(tmp_path):
     assert checks["activities"] == {"ck_activities_type", "ck_activities_contact_or_deal"}
 
     deal_indexes = {i["name"] for i in insp.get_indexes("deals")}
-    assert {"ix_deals_stage_position", "ix_deals_contact_id", "ix_deals_organization_id"} <= deal_indexes
-    fks = {(fk["referred_table"], fk["options"].get("ondelete")) for fk in insp.get_foreign_keys("activities")}
+    assert {
+        "ix_deals_stage_position",
+        "ix_deals_contact_id",
+        "ix_deals_organization_id",
+    } <= deal_indexes
+    fks = {
+        (fk["referred_table"], fk["options"].get("ondelete"))
+        for fk in insp.get_foreign_keys("activities")
+    }
     assert fks == {("contacts", "CASCADE"), ("deals", "CASCADE")}
 
 
@@ -40,7 +47,9 @@ def test_autogenerate_finds_no_difference(tmp_path):
     engine = db.make_engine(tmp_path / "m.db")
     migrate.upgrade(engine)
     with engine.connect() as conn:
-        diff = compare_metadata(MigrationContext.configure(conn, opts={"compare_type": True}), db.metadata)
+        diff = compare_metadata(
+            MigrationContext.configure(conn, opts={"compare_type": True}), db.metadata
+        )
     assert diff == []
 
 

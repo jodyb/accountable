@@ -74,7 +74,8 @@ export function DataTable<T extends RowData>(props: Props<T>) {
     getRowId: (row) => String(rowId(row)),
     state: { sorting, globalFilter: search },
     onSortingChange: setSorting,
-    globalFilterFn: (row, columnId, query) => matchesSearch([row.getValue(columnId)], String(query)),
+    globalFilterFn: (row, columnId, query) =>
+      matchesSearch([row.getValue(columnId)], String(query)),
   })
 
   const sortOf = (id: string): SortDir => {
@@ -140,12 +141,23 @@ export function DataTable<T extends RowData>(props: Props<T>) {
                   <td className="a" onClick={(e) => e.stopPropagation()}>
                     <div className="acts">
                       {onEdit && (
-                        <button type="button" title="Edit" aria-label={`Edit ${name}`} onClick={() => onEdit(row)}>
+                        <button
+                          type="button"
+                          title="Edit"
+                          aria-label={`Edit ${name}`}
+                          onClick={() => onEdit(row)}
+                        >
                           <Pencil size={15} />
                         </button>
                       )}
                       {onDelete && (
-                        <button type="button" className="del" title="Delete" aria-label={`Delete ${name}`} onClick={() => onDelete(row)}>
+                        <button
+                          type="button"
+                          className="del"
+                          title="Delete"
+                          aria-label={`Delete ${name}`}
+                          onClick={() => onDelete(row)}
+                        >
                           <Trash2 size={15} />
                         </button>
                       )}
@@ -163,6 +175,15 @@ export function DataTable<T extends RowData>(props: Props<T>) {
 }
 
 /** Rows after search, for "Showing N of M" counts. */
-export function countMatches<T extends RowData>(rows: T[], columns: Col<T>[], search: string): number {
-  return rows.filter((row) => matchesSearch(columns.map((c) => c.value?.(row)), search)).length
+export function countMatches<T extends RowData>(
+  rows: T[],
+  columns: Col<T>[],
+  search: string,
+): number {
+  return rows.filter((row) =>
+    matchesSearch(
+      columns.map((c) => c.value?.(row)),
+      search,
+    ),
+  ).length
 }

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Loading } from '../../app/Layout'
 import { ApiError, type Deal, type Stage } from '../../lib/api'
-import { centsToDollars, messageDate } from '../../lib/format'
+import { messageDate } from '../../lib/format'
 import { today } from '../../lib/dates'
 import { applyServerErrors, Field, invalid } from '../../ui/Field'
 import { SidePanel } from '../../ui/SidePanel'
@@ -11,7 +11,7 @@ import { useToast } from '../../ui/Toast'
 import { useContacts } from '../contacts/queries'
 import { useOrganizations } from '../organizations/queries'
 import { useCreateDeal, useUpdateDeal } from './queries'
-import { dealSchema, emptyDeal, toDealBody, type DealValues } from './schema'
+import { dealDefaults, dealSchema, emptyDeal, toDealBody, type DealValues } from './schema'
 import { DEFAULT_PROBABILITY, STAGES } from './stages'
 
 type Props = {
@@ -35,7 +35,8 @@ export function DealForm({ open, deal, onClose, ...rest }: Props) {
 
 /** A message for a stage change, or null if nothing to say. */
 export function stageMessage(stage: Stage, day: string): string | null {
-  if (stage === 'Won' || stage === 'Lost') return `Deal moved to ${stage}. Close date set to ${messageDate(day)}.`
+  if (stage === 'Won' || stage === 'Lost')
+    return `Deal moved to ${stage}. Close date set to ${messageDate(day)}.`
   return null
 }
 
@@ -54,33 +55,24 @@ function Body({ deal, stage, organizationId, contactId, onClose, onCreated }: Om
   const contacts = useContacts()
   const notify = useToast()
   const [formError, setFormError] = useState('')
-  const { register, handleSubmit, formState, setError, trigger, setValue } = useForm<DealValues>({
-    resolver: zodResolver(dealSchema),
-    mode: 'all',
-    defaultValues: deal
-      ? {
-          name: deal.name,
-          organization_id: deal.organization_id ? String(deal.organization_id) : '',
-          contact_id: deal.contact_id ? String(deal.contact_id) : '',
-          stage: deal.stage,
-          value: centsToDollars(deal.value_cents),
-          probability: String(deal.probability),
-          close_date: deal.close_date ?? '',
-        }
-      : {
-          ...emptyDeal(stage),
-          organization_id: organizationId ? String(organizationId) : '',
-          contact_id: contactId ? String(contactId) : '',
-        },
-  })
+  const { register, handleSubmit, formState, setError, trigger, setValue, setFocus } =
+    useForm<DealValues>({
+      resolver: zodResolver(dealSchema),
+      mode: 'all',
+      defaultValues: dealDefaults(deal, { stage, organizationId, contactId }),
+    })
   useEffect(() => {
     trigger()
-  }, [trigger])
+    setFocus('name')
+  }, [trigger, setFocus])
   const e = formState.errors
 
   const stageField = register('stage', {
     // A stage change takes the new stage's usual probability, as the server will.
-    onChange: (event) => setValue('probability', String(DEFAULT_PROBABILITY[event.target.value as Stage]), { shouldValidate: true }),
+    onChange: (event) =>
+      setValue('probability', String(DEFAULT_PROBABILITY[event.target.value as Stage]), {
+        shouldValidate: true,
+      }),
   })
 
   const submit = handleSubmit(async (values) => {
@@ -110,7 +102,11 @@ function Body({ deal, stage, organizationId, contactId, onClose, onCreated }: Om
     <form onSubmit={submit} noValidate>
       <div className="fields">
         <Field label="Deal name" htmlFor="deal-name" required error={e.name?.message}>
-          <input {...invalid('deal-name', e.name?.message)} {...register('name')} autoFocus placeholder="For example, Multi-site licence" />
+          <input
+            {...invalid('deal-name', e.name?.message)}
+            {...register('name')}
+            placeholder="For example, Multi-site licence"
+          />
         </Field>
         <Field label="Organization" htmlFor="deal-org">
           <select {...invalid('deal-org')} {...register('organization_id')}>
@@ -143,16 +139,37 @@ function Body({ deal, stage, organizationId, contactId, onClose, onCreated }: Om
               ))}
             </select>
           </Field>
-          <Field label="Probability (%)" htmlFor="deal-prob" required error={e.probability?.message}>
-            <input {...invalid('deal-prob', e.probability?.message)} {...register('probability')} inputMode="numeric" className={`in num${e.probability ? ' bad' : ''}`} />
+          <Field
+            label="Probability (%)"
+            htmlFor="deal-prob"
+            required
+            error={e.probability?.message}
+          >
+            <input
+              {...invalid('deal-prob', e.probability?.message)}
+              {...register('probability')}
+              inputMode="numeric"
+              className={`in num${e.probability ? ' bad' : ''}`}
+            />
           </Field>
         </div>
         <div className="field-row">
           <Field label="Value (USD)" htmlFor="deal-value" required error={e.value?.message}>
-            <input {...invalid('deal-value', e.value?.message)} {...register('value')} inputMode="decimal" placeholder="48500" className={`in num${e.value ? ' bad' : ''}`} />
+            <input
+              {...invalid('deal-value', e.value?.message)}
+              {...register('value')}
+              inputMode="decimal"
+              placeholder="48500"
+              className={`in num${e.value ? ' bad' : ''}`}
+            />
           </Field>
           <Field label="Close date" htmlFor="deal-close">
-            <input {...invalid('deal-close')} {...register('close_date')} type="date" className="in num" />
+            <input
+              {...invalid('deal-close')}
+              {...register('close_date')}
+              type="date"
+              className="in num"
+            />
           </Field>
         </div>
       </div>
@@ -161,7 +178,11 @@ function Body({ deal, stage, organizationId, contactId, onClose, onCreated }: Om
         <button type="button" className="btn ghost" onClick={onClose}>
           Cancel
         </button>
-        <button type="submit" className="btn" disabled={!formState.isValid || formState.isSubmitting}>
+        <button
+          type="submit"
+          className="btn"
+          disabled={!formState.isValid || formState.isSubmitting}
+        >
           Save deal
         </button>
       </div>

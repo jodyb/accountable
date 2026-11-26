@@ -14,11 +14,21 @@ export function Field({ label, htmlFor, required, error, children }: Props) {
     <div className="field">
       {htmlFor ? (
         <label htmlFor={htmlFor}>
-          {label} {required && <span className="req" aria-hidden>*</span>}
+          {label}{' '}
+          {required && (
+            <span className="req" aria-hidden>
+              *
+            </span>
+          )}
         </label>
       ) : (
         <span className="flabel">
-          {label} {required && <span className="req" aria-hidden>*</span>}
+          {label}{' '}
+          {required && (
+            <span className="req" aria-hidden>
+              *
+            </span>
+          )}
         </span>
       )}
       {children}

@@ -58,7 +58,9 @@ contacts = Table(
     Column("email", String(300)),
     Column("phone", String(50)),
     Column("job_title", String(200)),
-    Column("organization_id", Integer, ForeignKey("organizations.id", ondelete="SET NULL"), index=True),
+    Column(
+        "organization_id", Integer, ForeignKey("organizations.id", ondelete="SET NULL"), index=True
+    ),
     Column("status", String(20), nullable=False, default="lead", server_default="lead"),
     *_timestamps(),
     CheckConstraint(_in("status", STATUSES), name="status"),
@@ -69,7 +71,9 @@ deals = Table(
     metadata,
     Column("id", Integer, primary_key=True),
     Column("name", String(200), nullable=False),
-    Column("organization_id", Integer, ForeignKey("organizations.id", ondelete="SET NULL"), index=True),
+    Column(
+        "organization_id", Integer, ForeignKey("organizations.id", ondelete="SET NULL"), index=True
+    ),
     Column("contact_id", Integer, ForeignKey("contacts.id", ondelete="SET NULL"), index=True),
     Column("stage", String(20), nullable=False),
     Column("value_cents", Integer, nullable=False),

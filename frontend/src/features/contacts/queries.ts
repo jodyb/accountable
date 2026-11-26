@@ -1,13 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, type Activity, type Contact, type ContactDetail, type ContactIn } from '../../lib/api'
 
-export const useContacts = () => useQuery({ queryKey: ['contacts'], queryFn: () => api.get<Contact[]>('/contacts') })
+export const useContacts = () =>
+  useQuery({ queryKey: ['contacts'], queryFn: () => api.get<Contact[]>('/contacts') })
 
 export const useContact = (id: number, enabled = true) =>
-  useQuery({ enabled, queryKey: ['contact', id], queryFn: () => api.get<ContactDetail>(`/contacts/${id}`) })
+  useQuery({
+    enabled,
+    queryKey: ['contact', id],
+    queryFn: () => api.get<ContactDetail>(`/contacts/${id}`),
+  })
 
 export const useContactTimeline = (id: number, enabled = true) =>
-  useQuery({ enabled, queryKey: ['timeline', 'contact', id], queryFn: () => api.get<Activity[]>(`/contacts/${id}/timeline`) })
+  useQuery({
+    enabled,
+    queryKey: ['timeline', 'contact', id],
+    queryFn: () => api.get<Activity[]>(`/contacts/${id}/timeline`),
+  })
 
 export const useSaveContact = () =>
   useMutation({

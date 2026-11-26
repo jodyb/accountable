@@ -48,7 +48,14 @@ def test_contacts_cover_every_status(seeded):
 def test_deals_cover_every_stage(seeded):
     ds = seeded["deals"]
     assert len(ds) == 40
-    assert set(d["stage"] for d in ds) == {"New", "Qualified", "Proposal", "Negotiation", "Won", "Lost"}
+    assert {d["stage"] for d in ds} == {
+        "New",
+        "Qualified",
+        "Proposal",
+        "Negotiation",
+        "Won",
+        "Lost",
+    }
 
 
 def test_won_and_lost_spread_across_the_past_12_months(seeded):
@@ -70,7 +77,9 @@ def test_open_deals_close_in_coming_months_and_a_few_are_late(seeded):
 
 def test_won_deals_main_contacts_are_customers(seeded):
     status = {c["id"]: c["status"] for c in seeded["contacts"]}
-    assert all(status[d["contact_id"]] == "customer" for d in seeded["deals"] if d["stage"] == "Won")
+    assert all(
+        status[d["contact_id"]] == "customer" for d in seeded["deals"] if d["stage"] == "Won"
+    )
 
 
 def test_positions_are_0_to_n_in_each_column(seeded):
@@ -101,10 +110,16 @@ def test_follow_ups_overdue_and_due_this_week(seeded):
 
 def test_no_placeholder_text(seeded):
     text = " ".join(
-        str(v) for table in seeded.values() for row in table for v in row.values() if isinstance(v, str)
+        str(v)
+        for table in seeded.values()
+        for row in table
+        for v in row.values()
+        if isinstance(v, str)
     ).lower()
     for word in ("lorem", "ipsum", "foo", "test", "example", "placeholder", "todo", "{", "}"):
-        assert not re.search(rf"\b{re.escape(word)}\b", text) if word.isalpha() else word not in text, word
+        assert (
+            not re.search(rf"\b{re.escape(word)}\b", text) if word.isalpha() else word not in text
+        ), word
 
 
 def test_same_output_twice_for_the_same_today(engine):
@@ -113,7 +128,10 @@ def test_same_output_twice_for_the_same_today(engine):
             seed.reset(conn)
             seed.load(conn, TODAY)
         with engine.connect() as conn:
-            return {t.name: [dict(r) for r in rows(conn, t)] for t in (organizations, contacts, deals, activities)}
+            return {
+                t.name: [dict(r) for r in rows(conn, t)]
+                for t in (organizations, contacts, deals, activities)
+            }
 
     assert snapshot() == snapshot()
 
@@ -136,7 +154,9 @@ def test_reset_while_the_server_runs_keeps_it_working(db_file):
         seed.reset_database(db_file, TODAY)
         names = [o["name"] for o in client.get("/api/organizations").json()]
         assert "Added before reset" not in names and len(names) == len(seed.ORGANIZATIONS)
-        assert client.post("/api/organizations", json={"name": "Added after reset"}).status_code == 201
+        assert (
+            client.post("/api/organizations", json={"name": "Added after reset"}).status_code == 201
+        )
 
 
 def test_dashboard_has_figures_for_every_widget(engine, client):

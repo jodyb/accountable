@@ -3,9 +3,8 @@
 from contextlib import asynccontextmanager
 from datetime import date
 
-from fastapi import APIRouter, Depends, FastAPI
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from sqlalchemy import Connection
 
 from accountable import config, crm, db, errors, migrate
 from accountable.crm import schemas, seed
@@ -35,7 +34,7 @@ def test_router() -> APIRouter:
     router = APIRouter(prefix="/test", tags=["test"], include_in_schema=False)
 
     @router.post("/reseed", status_code=204)
-    def reseed(body: schemas.ReseedIn, conn: Connection = Depends(db.get_conn)):
+    def reseed(body: schemas.ReseedIn, conn: db.Conn):
         seed.reset(conn)
         seed.load(conn, body.today)
 

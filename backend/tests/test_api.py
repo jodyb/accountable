@@ -48,7 +48,10 @@ def test_a_huge_value_is_a_field_error_not_a_crash(client):
 def test_other_local_pages_are_not_allowed_to_call_the_api(client):
     """The browser reaches the API through Vite's proxy, so no origin needs CORS."""
     origin = {"Origin": "http://localhost:3000"}
-    assert "access-control-allow-origin" not in client.get("/api/organizations", headers=origin).headers
+    assert (
+        "access-control-allow-origin"
+        not in client.get("/api/organizations", headers=origin).headers
+    )
     preflight = client.options(
         "/api/organizations", headers={**origin, "Access-Control-Request-Method": "POST"}
     )
@@ -60,7 +63,9 @@ def test_local_host_names_are_answered(client, host):
     assert client.get("/api/health", headers={"Host": host}).status_code == 200
 
 
-@pytest.mark.parametrize("host", ["attacker.example", "attacker.example:8000", "localhost.attacker.example"])
+@pytest.mark.parametrize(
+    "host", ["attacker.example", "attacker.example:8000", "localhost.attacker.example"]
+)
 def test_other_host_names_are_refused_against_dns_rebinding(client, host):
     assert client.get("/api/organizations", headers={"Host": host}).status_code == 400
 
