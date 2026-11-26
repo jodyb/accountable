@@ -52,6 +52,8 @@ Review the file it writes in `backend/migrations/versions/`, and commit it with 
 
 - **Harness, hooks:** a lefthook pre-commit hook (`lefthook.yml`, installed by `npm install`) formats staged files with Prettier and ruff and restages them, then runs lint, type checks and `gitleaks git --staged`. It skips the tests. Claude Code hooks in `.claude/settings.json`: a Stop hook (`.claude/hooks/check-on-stop.mjs`) runs `npm run check:quick` when there are uncommitted changes and sends a failure back once. A PreToolUse hook (`.claude/hooks/protect-env.mjs`) refuses file edits to `.env*` (except `.env.example`) and any shell command naming one.
 
+- **Harness, CI:** `.github/workflows/ci.yml` runs one job, `check`, on every push to any branch. It installs gitleaks (checksum verified) and scans the whole history first, then sets up Node 26 and uv and runs `npm run check` with the runner's Google Chrome. A failed run uploads the Playwright HTML report and traces as the `playwright-report` artifact. It uses no secrets.
+
 Test counts: 166 pytest, 128 Vitest, 45 Playwright.
 
 - **Mockup review (M5):** all ten screens captured at 1440px and compared with their `a-` mockups. Fixed: a global `.ghost` rule from the pipeline drag faded every secondary button to 35% opacity (now `.card-leaving`, with an e2e check); stage names in timeline entries are now bold; selects use the mockup's chevron.
