@@ -1,0 +1,35 @@
+# Git hooks, installed by `npm install` (postinstall runs `lefthook install`).
+# The pre-commit hook stays quick: it formats what is staged, then lints, type-checks
+# and scans for secrets. Tests run in `npm run check`, not here.
+pre-commit:
+  piped: true # one job at a time, stopping at the first failure
+  jobs:
+    - name: format frontend
+      glob:
+        - 'frontend/**/*'
+        - 'e2e/**/*'
+        - 'scripts/**/*'
+        - '.claude/hooks/**/*'
+        - '*.config.{ts,mjs}'
+      run: npx prettier --write --ignore-unknown {staged_files}
+      stage_fixed: true
+
+    - name: format backend
+      glob: '*.py'
+      run: uv run ruff format {staged_files}
+      stage_fixed: true
+
+    - name: lint
+      run: npm run --silent lint
+
+    - name: types
+      run: npm run --silent types:check && npm run --silent typecheck:web && npm run --silent typecheck:e2e && npm run --silent typecheck:py
+
+    - name: secrets
+      run: |
+        if ! command -v gitleaks >/dev/null 2>&1; then
+          echo "gitleaks is not installed, so this commit can't be checked for secrets."
+          echo "Install it (macOS: brew install gitleaks; others: https://github.com/gitleaks/gitleaks#installing), then commit again."
+          exit 1
+        fi
+        gitleaks git --pre-commit --staged --redact --no-banner

@@ -10,19 +10,19 @@
     "node": ">=24"
   },
   "scripts": {
-    "postinstall": "uv sync",
+    "postinstall": "uv sync && lefthook install",
     "dev": "concurrently --kill-others-on-fail --names api,web --prefix-colors cyan,green \"uv run uvicorn accountable.main:app --port 8000 --reload --reload-dir backend/accountable\" \"npm run dev -w frontend\"",
     "seed": "uv run python -m accountable.crm.seed --reset",
     "types": "uv run python -m accountable.openapi frontend/openapi.json && npm run types -w frontend",
     "types:check": "uv run python -m accountable.openapi frontend/openapi.json && npm run types:check -w frontend",
     "check": "node scripts/check.mjs",
     "check:quick": "node scripts/check.mjs --quick",
-    "format": "prettier --write frontend e2e scripts playwright.config.ts eslint.config.mjs && uv run ruff format .",
+    "format": "prettier --write frontend e2e scripts .claude/hooks playwright.config.ts eslint.config.mjs && uv run ruff format .",
     "format:check": "npm run format:check:web && npm run format:check:py",
-    "format:check:web": "prettier --check frontend e2e scripts playwright.config.ts eslint.config.mjs",
+    "format:check:web": "prettier --check frontend e2e scripts .claude/hooks playwright.config.ts eslint.config.mjs",
     "format:check:py": "uv run ruff format --check .",
     "lint": "npm run lint:web && npm run lint:py",
-    "lint:web": "eslint --max-warnings 0 frontend e2e scripts playwright.config.ts eslint.config.mjs",
+    "lint:web": "eslint --max-warnings 0 frontend e2e scripts .claude/hooks playwright.config.ts eslint.config.mjs",
     "lint:py": "uv run ruff check .",
     "typecheck:web": "npm run typecheck -w frontend",
     "typecheck:e2e": "tsc -p e2e/tsconfig.json",
@@ -44,6 +44,7 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.14.0",
+    "lefthook": "^2.2.4",
     "prettier": "^3.10.1",
     "typescript-eslint": "^8.74.0"
   }

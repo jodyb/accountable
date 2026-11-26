@@ -16,7 +16,13 @@ export default tseslint.config(
     languageOptions: { globals: globals.browser },
   },
   {
-    files: ['e2e/**/*.ts', 'scripts/**/*.mjs', '*.config.{ts,mjs}', 'frontend/*.config.ts'],
+    files: [
+      'e2e/**/*.ts',
+      'scripts/**/*.mjs',
+      '.claude/hooks/**/*.mjs',
+      '*.config.{ts,mjs}',
+      'frontend/*.config.ts',
+    ],
     languageOptions: { globals: globals.node },
   },
   { rules: { complexity: ['error', 15] } },

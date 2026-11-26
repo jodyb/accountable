@@ -50,6 +50,8 @@ Review the file it writes in `backend/migrations/versions/`, and commit it with 
 
 - **Harness, enforced standards:** `npm run check`, `check:quick` and `format` (see the table above). To pass them without loosening any rule: FastAPI routes take the connection as `Conn = Annotated[Connection, Depends(get_conn)]`; `db.insert_id` replaces the untyped `inserted_primary_key[0]`; the four forms build their defaults in `schema.ts` and focus their first field with React Hook Form's `setFocus` instead of `autoFocus`; `useWatch` replaces `watch`. Page-level Vitest tests against a fake API (`frontend/src/test/`) lifted frontend unit coverage from 23% to over 90%.
 
+- **Harness, hooks:** a lefthook pre-commit hook (`lefthook.yml`, installed by `npm install`) formats staged files with Prettier and ruff and restages them, then runs lint, type checks and `gitleaks git --staged`. It skips the tests. Claude Code hooks in `.claude/settings.json`: a Stop hook (`.claude/hooks/check-on-stop.mjs`) runs `npm run check:quick` when there are uncommitted changes and sends a failure back once. A PreToolUse hook (`.claude/hooks/protect-env.mjs`) refuses file edits to `.env*` (except `.env.example`) and any shell command naming one.
+
 Test counts: 166 pytest, 128 Vitest, 45 Playwright.
 
 - **Mockup review (M5):** all ten screens captured at 1440px and compared with their `a-` mockups. Fixed: a global `.ghost` rule from the pipeline drag faded every secondary button to 35% opacity (now `.card-leaving`, with an e2e check); stage names in timeline entries are now bold; selects use the mockup's chevron.
